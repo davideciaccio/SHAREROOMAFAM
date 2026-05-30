@@ -15,9 +15,25 @@ public class ConfirmText {
         alert.setContentText(message);
     }
 
+    // Metodo originale per gestire i Sequence Diagram in cui l'utente "cliccaOkay()"
     public boolean okay() {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
+            confirmed = true;
+        }
+        destroy();
+        return confirmed;
+    }
+
+    // NUOVO metodo per gestire i Sequence Diagram in cui l'utente "cliccaSi()"
+    public boolean si() {
+        // Rinominiamo i bottoni in "Sì" e "No"
+        ButtonType btnSi = new ButtonType("Sì");
+        ButtonType btnNo = new ButtonType("No");
+        alert.getButtonTypes().setAll(btnSi, btnNo);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == btnSi) {
             confirmed = true;
         }
         destroy();

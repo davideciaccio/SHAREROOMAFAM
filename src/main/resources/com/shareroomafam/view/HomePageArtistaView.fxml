@@ -17,6 +17,6 @@
         </font>
     </Label>
 
-    <Button mnemonicParsing="false" text="Gestione Profilo" maxWidth="200" style="-fx-padding: 10px;"/>
+    <Button mnemonicParsing="false" onAction="#apriGestioneProfilo" text="Gestione Profilo" maxWidth="200" style="-fx-padding: 10px;"/>
     <Button mnemonicParsing="false" text="Gestione Stanze" maxWidth="200" style="-fx-padding: 10px;"/>
 </VBox>

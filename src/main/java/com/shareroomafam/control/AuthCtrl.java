@@ -534,4 +534,9 @@ public class AuthCtrl {
     void mostraHomePageArtistaView(ActionEvent event) {
         com.shareroomafam.utility.Router.mostraHomePageArtistaView(event);
     }
+
+    @FXML
+    void apriGestioneProfilo(ActionEvent event) {
+        com.shareroomafam.utility.Router.mostraGestioneProfiloView(event);
+    }
 }

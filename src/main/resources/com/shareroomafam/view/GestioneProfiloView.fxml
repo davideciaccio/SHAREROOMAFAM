@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.GestioneProfiloCtrl" prefWidth="600.0" prefHeight="450.0">
+    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+
+    <Label text="Gestione Profilo">
+        <font><Font name="System Bold" size="28.0" /></font>
+    </Label>
+
+    <Label text="Seleziona l'operazione desiderata" textFill="#555555" />
+
+    <Button mnemonicParsing="false" text="Gestione dati personali" maxWidth="250" style="-fx-padding: 10px;"/>
+    <Button mnemonicParsing="false" text="Gestisci documenti" maxWidth="250" style="-fx-padding: 10px;"/>
+    <Button mnemonicParsing="false" text="Cancella profilo" maxWidth="250" style="-fx-padding: 10px; -fx-text-fill: red;"/>
+
+    <Button mnemonicParsing="false" onAction="#cliccaDisconnettiProfilo" text="Disconnetti profilo" maxWidth="250" style="-fx-padding: 10px; -fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+    <Separator prefWidth="200.0" />
+    <Button mnemonicParsing="false" onAction="#tornaAllaHome" text="Torna alla Home" maxWidth="250" style="-fx-padding: 10px;"/>
+</VBox>

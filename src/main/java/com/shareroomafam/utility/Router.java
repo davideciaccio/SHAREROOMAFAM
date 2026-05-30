@@ -83,4 +83,8 @@ public class Router {
     public static void mostraProfiloView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ProfiloView.fxml", "ShareRoom AFAM - Profilo Artista");
     }
+
+    public static void mostraGestioneProfiloView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/GestioneProfiloView.fxml", "ShareRoom AFAM - Gestione Profilo");
+    }
 }
