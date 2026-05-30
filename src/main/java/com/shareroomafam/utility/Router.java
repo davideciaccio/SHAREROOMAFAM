@@ -55,4 +55,16 @@ public class Router {
     public static void mostraAccessoConSPIDForm(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/AccessoConSPIDForm.fxml", "ShareRoom AFAM - Login SPID");
     }
+
+    public static void mostraRecuperaPasswordForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/RecuperaPasswordForm.fxml", "ShareRoom AFAM - Recupero Password");
+    }
+
+    public static void mostraInserisciCodiceVerificaForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/InserisciCodiceVerificaForm.fxml", "ShareRoom AFAM - Inserisci Codice");
+    }
+
+    public static void mostraPasswordView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/MostraPasswordView.fxml", "ShareRoom AFAM - La tua Password");
+    }
 }

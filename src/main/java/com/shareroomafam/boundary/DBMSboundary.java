@@ -149,4 +149,22 @@ public class DBMSboundary {
         String sql = "SELECT * FROM ARTISTA WHERE email = ?";
         return queryDBMS(sql, email);
     }
+
+    // --- METODI PER SEQUENCE RECUPERA PASSWORD ---
+
+    public ResultSet queryDBMSVerificaEmail(String email) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM ARTISTA WHERE email = ?";
+        return queryDBMS(sql, email);
+    }
+
+    public int insertDBMScodiceVerifica(String email, String codice) throws SQLException {
+        // Esegue esattamente la stessa operazione del 2FA
+        String sql = "UPDATE ARTISTA SET codiceVerifica = ? WHERE email = ?";
+        return insertDBMS(sql, codice, email);
+    }
+
+    public ResultSet queryDBMSRecuperaPassword(String email) throws SQLException {
+        String sql = "SELECT password FROM ARTISTA WHERE email = ?";
+        return queryDBMS(sql, email);
+    }
 }

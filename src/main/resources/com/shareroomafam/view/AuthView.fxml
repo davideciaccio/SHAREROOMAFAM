@@ -38,7 +38,7 @@
     <Label fx:id="errorLabel" textFill="RED" wrapText="true" />
 
     <VBox alignment="CENTER" spacing="10.0">
-        <Button mnemonicParsing="false" onAction="#apriRecuperoPassword" text="Recupera password" maxWidth="Infinity"/>
+        <Button mnemonicParsing="false" onAction="#cliccaRecuperaPassword" text="Recupera password" maxWidth="Infinity"/>
         <Button mnemonicParsing="false" onAction="#apriRegistrazione" text="Registrati" maxWidth="Infinity"/>
         <Button mnemonicParsing="false" onAction="#apriVisualizzaProfili" text="Visualizza profili" maxWidth="Infinity" style="-fx-background-color: #28A745; -fx-text-fill: white;"/>
     </VBox>

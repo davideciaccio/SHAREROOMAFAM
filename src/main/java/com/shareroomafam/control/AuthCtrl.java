@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
@@ -22,6 +23,10 @@ public class AuthCtrl {
     // --- VARIABILE DI STATO GLOBALE PER IL LOGIN 2FA ---
     private static String emailInAttesaDiVerifica;  // Per Login 2FA
     private static String enteSpidSelezionato;     // Per Login SPID
+
+    private static String emailPerRecupero;           // Per Recupero Password
+    public static String passwordRecuperataCorrente;  // Per MostraPasswordView
+
 
     // ==========================================
     // CAMPI FXML
@@ -51,6 +56,12 @@ public class AuthCtrl {
     @FXML private TextField emailSpidField;
     @FXML private PasswordField passwordSpidField;
 
+    // Campi RecuperaPasswordForm, InserisciCodiceVerificaForm e MostraPasswordView
+    @FXML private TextField emailRecuperoField;
+    @FXML private TextField codiceVerificaField;
+    @FXML private Label passwordRecuperataLabel;
+
+
     // ==========================================
     // INIZIALIZZAZIONE VISTE
     // ==========================================
@@ -59,6 +70,11 @@ public class AuthCtrl {
         // Popola la tendina dello SPID se la vista è AccessoConSpidMenuView
         if (enteSpidCombo != null) {
             enteSpidCombo.getItems().addAll("Poste ID", "InfoCert ID", "Sielte ID", "Namirial ID", "Aruba ID");
+        }
+
+        // Inietta la password decifrata nella UI quando viene aperta MostraPasswordView
+        if (passwordRecuperataLabel != null && passwordRecuperataCorrente != null) {
+            passwordRecuperataLabel.setText(passwordRecuperataCorrente);
         }
     }
 
@@ -366,7 +382,137 @@ public class AuthCtrl {
         }
     }
 
-    @FXML void apriRecuperoPassword(ActionEvent event) {}
+    // ==========================================
+    // SEQUENCE: RECUPERA PASSWORD
+    // ==========================================
+
+    // 1. L'artista cliccaRecuperaPassoword() nell'AuthView
+    @FXML
+    void cliccaRecuperaPassword(ActionEvent event) {
+        // 2. AuthView crea AuthCtrl (Gestito da JavaFX)
+        // 3. AuthCtrl crea RecuperaPasswordForm
+        com.shareroomafam.utility.Router.mostraRecuperaPasswordForm(event);
+    }
+
+    // 5. L'artista cliccaOkay() dentro RecuperaPasswordForm
+    @FXML
+    void cliccaOkayRecupero(ActionEvent event) {
+        // 4. l'artista inserisceEmail() dentro RecuperaPasswordForm
+        String email = emailRecuperoField.getText();
+
+        // 6. RecuperaPasswordForm fa passaDatiEmailInserita() all'authCtrl
+        passaDatiEmailInserita(event, email);
+    }
+
+    private void passaDatiEmailInserita(ActionEvent event, String email) {
+        ResultSet rs = null;
+        try {
+            // 7. AuthCtrl fa una queryDBMSVerificaEmail alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSVerificaEmail(email);
+            boolean emailPresente = false;
+            if (rs != null && rs.next()) {
+                if (rs.getInt(1) > 0) emailPresente = true;
+            }
+
+            // 8. IF email non presente
+            if (!emailPresente) {
+                // 8.1. AuthCtrl crea ErrorText, segue artista cliccaOkay, segue destroy errorText
+                ErrorText errorText = new ErrorText("E-mail non presente");
+                errorText.okay();
+
+                // segue AuthCtrl invoca il metodo mostraAuthView().
+                mostraAuthView(event);
+            } else {
+                // 9. ELSE email presente
+                emailPerRecupero = email;
+
+                // 9.1 AuthCtrl invoca il metodo creaCodiceVerifica()
+                String codiceVerifica = creaCodiceVerifica();
+                System.out.println("DEBUG RECUPERO PASSWORD CODICE: " + codiceVerifica);
+
+                // 9.2 AuthCtrl fa la insertDBMScodiceVerifica() alla DBMSboundary
+                DBMSboundary.getInstance().insertDBMScodiceVerifica(email, codiceVerifica);
+
+                // 9.3 AuthCtrl inviaEmail(codiceVerifica)
+                InviaEmail(email, codiceVerifica);
+
+                // 9.4 AuthCtrl Crea InserisciCodiceVerificaForm
+                com.shareroomafam.utility.Router.mostraInserisciCodiceVerificaForm(event);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) {
+                    java.sql.Statement stmt = rs.getStatement();
+                    if (stmt != null) stmt.close();
+                }
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 9.6 L'artista cliccaInvia() [Nominato cliccaInviaRecupero per la specifica FXML]
+    @FXML
+    void cliccaInviaRecupero(ActionEvent event) {
+        // 9.5 L'artista InserisceCodiceVerifica()
+        String codice = codiceVerificaField.getText();
+
+        // 9.7 InserisciCodiceForm fa passaDatiCodiceVerifica() all'authCtrl
+        passaDatiCodiceVerifica(event, codice);
+    }
+
+    private void passaDatiCodiceVerifica(ActionEvent event, String codice) {
+        ResultSet rs = null;
+        try {
+            // 9.8 AuthCtrl fa una queryDBMSVerificaCodice alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSVerificaCodice(emailPerRecupero, codice);
+
+            if (rs != null && rs.next()) {
+                // 11. ELSE codice corretto
+
+                // 11.1 AuthCtrl fa una queryDBMSRecuperaPassword() alla DBMSBoundary
+                ResultSet rsPass = DBMSboundary.getInstance().queryDBMSRecuperaPassword(emailPerRecupero);
+                if (rsPass != null && rsPass.next()) {
+                    passwordRecuperataCorrente = rsPass.getString("password");
+                    rsPass.getStatement().close();
+                }
+
+                // Pulizia token di sicurezza
+                DBMSboundary.getInstance().insertDBMScodiceVerifica(emailPerRecupero, null);
+
+                // 11.2 AuthCtrl crea MostraPasswordView
+                com.shareroomafam.utility.Router.mostraPasswordView(event);
+
+            } else {
+                // 10 IF Codice errato
+                // 10.1 Authctrl crea ErrorText, segue artista cliccaOkay. segue destroy
+                ErrorText errorText = new ErrorText("Codice errato");
+                errorText.okay();
+
+                // segue authctrl mostraAuthView
+                mostraAuthView(event);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) {
+                    java.sql.Statement stmt = rs.getStatement();
+                    if (stmt != null) stmt.close();
+                }
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 11.3 L'artista cliccaOkay(), segue destroy, segue AuthCtrl invoca il metodo mostraAuthView.
+    @FXML
+    void cliccaOkayPassword(ActionEvent event) {
+        passwordRecuperataCorrente = null; // Svuota la password dalla memoria
+        emailPerRecupero = null;
+        mostraAuthView(event);
+    }
+
+
     @FXML void apriVisualizzaProfili(ActionEvent event) {}
 
 
