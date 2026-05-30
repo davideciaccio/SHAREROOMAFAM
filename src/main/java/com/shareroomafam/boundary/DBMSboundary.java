@@ -191,4 +191,12 @@ public class DBMSboundary {
         String sql = "SELECT * FROM ARTISTA WHERE codiceFiscale = ?";
         return queryDBMS(sql, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE GESTIONE PROFILO (Cancella Profilo) ---
+
+    public int removeDBMSProfiloArtista(String codiceFiscale) throws SQLException {
+        // Grazie al ON DELETE CASCADE nel DB, questa singola query rimuove a cascata anche Carriera, Documenti e Stanze
+        String sql = "DELETE FROM ARTISTA WHERE codiceFiscale = ?";
+        return insertDBMS(sql, codiceFiscale); // Usiamo insertDBMS perché gestisce l'esecuzione di query di modifica (INSERT/UPDATE/DELETE)
+    }
 }

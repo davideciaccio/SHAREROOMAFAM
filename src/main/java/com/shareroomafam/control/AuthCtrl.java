@@ -183,6 +183,8 @@ public class AuthCtrl {
 
                 Artista artista = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, password, null);
                 System.out.println("Accesso completato per l'artista: " + artista.getNome() + " " + artista.getCognome());
+                // AGGIUNGI QUESTA RIGA PER SALVARE LA SESSIONE!
+                GestioneProfiloCtrl.artistaLoggato = artista;
 
                 // e mostraHomePageArtistaView()
                 mostraHomePageArtistaView(event);
@@ -366,6 +368,8 @@ public class AuthCtrl {
 
                 Artista artista = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, null, null);
                 System.out.println("✅ Accesso SPID verificato per: " + artista.getNome() + " " + artista.getCognome());
+                // AGGIUNGI QUESTA RIGA PER SALVARE LA SESSIONE!
+                GestioneProfiloCtrl.artistaLoggato = artista;
 
                 // 12.2 AuthCtrl invoca il metodo mostraHomePageArtistaView()
                 mostraHomePageArtistaView(event);
