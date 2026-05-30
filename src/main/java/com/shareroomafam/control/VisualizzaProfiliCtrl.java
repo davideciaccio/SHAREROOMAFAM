@@ -1,13 +1,21 @@
 package com.shareroomafam.control;
 
 import com.shareroomafam.boundary.DBMSboundary;
+import com.shareroomafam.entity.Artista;
 import com.shareroomafam.entity.Utente;
 import com.shareroomafam.textmessage.ErrorText;
 import com.shareroomafam.utility.Router;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -17,13 +25,25 @@ public class VisualizzaProfiliCtrl {
 
     // Campi FXML
     @FXML private TextField ricercaField;           // In CercaArtistaView
-    @FXML private ListView<String> risultatiListView; // In ListaArtistiView
+    @FXML private ListView<HBox> risultatiListView; // In ListaArtistiView
+    // Campi FXML Filtro Dati Artistici
+    @FXML private TextField carrieraFiltroField;      // In CampiFiltriForm
+    @FXML private TextField anniCarrieraFiltroField;  // In CampiFiltriForm
+    // Campi FXML ProfiloView
+    @FXML private Label profiloNomeDarteLabel;
+    @FXML private Label profiloNomeLabel;
+    @FXML private Label profiloCognomeLabel;
+    @FXML private Label profiloSessoLabel;
+    @FXML private Label profiloEmailLabel;
+    @FXML private ImageView profiloImmagine;
+    @FXML private ListView<String> documentiListView;
 
     // Variabili di stato
     private Utente utenteCorrente;
+    private static Artista artistaDaVisualizzare; // Per passare i dati alla ProfiloView
 
     // Lista statica per passare i dati dei risultati tra la schermata di ricerca e la schermata della lista
-    private static List<String> risultatiRicercaTemporanei = new ArrayList<>();
+    private static List<String[]> risultatiRicercaTemporanei = new ArrayList<>();
 
     @FXML
     public void initialize() {
@@ -39,9 +59,48 @@ public class VisualizzaProfiliCtrl {
 
         // 4. VisualizzaProfiliCtrl crea una view chiamata CercaArtistaView (Avviene automaticamente al caricamento del FXML)
 
-        // Se ci troviamo nella ListaArtistiView, popoliamo la lista a schermo
+        // Se ci troviamo nella ListaArtistiView, popoliamo la lista a schermo con i bottoni "Visualizza" per ogni artista
         if (risultatiListView != null) {
-            risultatiListView.getItems().addAll(risultatiRicercaTemporanei);
+            risultatiListView.getItems().clear();
+
+            for (String[] datiArtista : risultatiRicercaTemporanei) {
+                String cf = datiArtista[0];
+                String testoDisplay = datiArtista[1];
+
+                // Creiamo un contenitore orizzontale (HBox) per riga
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                // Creiamo il testo e il bottone richiesto dal RAD
+                Label lblTesto = new Label(testoDisplay);
+                Button btnVisualizza = new Button("Visualizza");
+                btnVisualizza.setStyle("-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;");
+
+                // Nascondiamo il CF dentro il bottone, e colleghiamo l'azione al metodo del Sequence!
+                btnVisualizza.setUserData(cf);
+                btnVisualizza.setOnAction(this::cliccaVisualizza);
+
+                // Impaginazione (il testo a sinistra, il bottone tutto a destra)
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                row.getChildren().addAll(lblTesto, spacer, btnVisualizza);
+                risultatiListView.getItems().add(row);
+            }
+        }
+
+        // --- POPOLAMENTO DATI PROFILO (ProfiloView) ---
+        if (profiloNomeDarteLabel != null && artistaDaVisualizzare != null) {
+            profiloNomeDarteLabel.setText(artistaDaVisualizzare.getNomeDarte());
+            profiloNomeLabel.setText(artistaDaVisualizzare.getNome());
+            profiloCognomeLabel.setText(artistaDaVisualizzare.getCognome());
+            profiloSessoLabel.setText(artistaDaVisualizzare.getSesso());
+            profiloEmailLabel.setText(artistaDaVisualizzare.getEmail());
+            // Task 2: La lista documenti attualmente risulterà vuota
+            if (documentiListView != null) {
+                documentiListView.getItems().clear();
+                documentiListView.getItems().add("Nessun documento caricato.");
+            }
         }
     }
 
@@ -76,12 +135,13 @@ public class VisualizzaProfiliCtrl {
                 while (rs.next()) {
                     artistaTrovato = true;
                     // Estrae nome, cognome e nome d'arte come da direttiva
+                    String cf = rs.getString("codiceFiscale");
                     String nomeDarte = rs.getString("nomeDarte");
                     String nome = rs.getString("nome");
                     String cognome = rs.getString("cognome");
 
                     // Formatta la stringa da mostrare nella lista (es. "Michelangelo (Michelangelo Buonarroti)")
-                    risultatiRicercaTemporanei.add("🎭 " + nomeDarte + " - (" + nome + " " + cognome + ")");
+                    risultatiRicercaTemporanei.add(new String[]{cf, "🎭 " + nomeDarte + " - (" + nome + " " + cognome + ")"});
                 }
             }
 
@@ -111,7 +171,135 @@ public class VisualizzaProfiliCtrl {
         }
     }
 
-    // Metodo esplicito richiesto dal Sequence Diagram al punto 9.1
+    // ==========================================
+    // SEQUENCE: Visualizza profili - Filtra per dati artistici
+    // ==========================================
+
+    // 1. L'utente cliccaIconaFiltra() dentro CercaArtistaView
+    @FXML
+    void cliccaIconaFiltra(ActionEvent event) {
+        // 2. CercaArtistaView crea VisualizzaProfiliCtrl (Già gestito dal framework)
+        // 3. VisualizzaProfiliCtrl crea CampiFiltriForm
+        Router.mostraCampiFiltriForm(event);
+    }
+
+    // 5. L'utente cliccaFiltra() dentro CampiFiltriForm
+    @FXML
+    void cliccaFiltra(ActionEvent event) {
+        // 4. L'utente inserisciFiltri() dentro CampiFiltriForm
+        String carriera = carrieraFiltroField.getText();
+        String anniTesto = anniCarrieraFiltroField.getText();
+        int anniDiCarriera = 0;
+
+        try {
+            if (anniTesto != null && !anniTesto.trim().isEmpty()) {
+                anniDiCarriera = Integer.parseInt(anniTesto.trim());
+            }
+        } catch (NumberFormatException ex) {
+            ErrorText error = new ErrorText("Inserisci un numero valido per gli anni.");
+            error.okay();
+            return;
+        }
+
+        // 6. CampiFiltriForm fa il passaDatiFiltri() al VisualizzaProfiliCtrl
+        passaDatiFiltri(event, carriera, anniDiCarriera);
+    }
+
+    private void passaDatiFiltri(ActionEvent event, String carriera, int anniDiCarriera) {
+        ResultSet rs = null;
+        try {
+            // 7. VisualizzaProfiliCtrl fa la queryDBMSFiltraArtisti() alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSFiltraArtisti(carriera, anniDiCarriera);
+
+            risultatiRicercaTemporanei.clear();
+            boolean artistaTrovato = false;
+
+            if (rs != null) {
+                while (rs.next()) {
+                    artistaTrovato = true;
+                    // Estraiamo i campi anche dalla tabella carriera grazie alla JOIN
+                    String cf = rs.getString("codiceFiscale");
+                    String nomeDarte = rs.getString("nomeDarte");
+                    String nome = rs.getString("nome");
+                    String cognome = rs.getString("cognome");
+                    String tipologia = rs.getString("tipologia");
+                    int anni = rs.getInt("anni");
+
+                    // Formatta la stringa per mostrare anche la professione
+                    risultatiRicercaTemporanei.add(new String[]{cf, "🎭 " + nomeDarte + " - (" + nome + " " + cognome + ") | " + tipologia + " (" + anni + " anni)"});
+                }
+            }
+
+            if (!artistaTrovato) {
+                ErrorText errorText = new ErrorText("Nessun artista trovato con questi filtri.");
+                errorText.okay();
+                // Potremmo voler restare nel form, l'utente proverà altri filtri
+            } else {
+                // 8. VisualizzaProfiliCtrl crea una ListaArtistiView popolata dal risultato del filtraggio.
+                Router.mostraListaArtistiView(event);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) {
+                    java.sql.Statement stmt = rs.getStatement();
+                    if (stmt != null) stmt.close();
+                }
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // ==========================================
+    // SEQUENCE: Visualizza profili - Visualizza
+    // ==========================================
+
+    // 1. L'utente CliccaVisualizza() sulla ListaArtistiView()
+    @FXML
+    void cliccaVisualizza(ActionEvent event) {
+        // Estraiamo il Codice Fiscale "nascosto" nel bottone che è stato premuto
+        Button btnPremuto = (Button) event.getSource();
+        String codiceFiscaleDaCercare = (String) btnPremuto.getUserData();
+
+        // 2. ListaArtistaView crea VisualizzaProfiliCtrl (Già fatto dal JavaFX)
+
+        ResultSet rs = null;
+        try {
+            // 3. VisualizzaProfiloCtrl fa una queryDBMSProfiloArtista
+            rs = DBMSboundary.getInstance().queryDBMSProfiloArtista(codiceFiscaleDaCercare);
+
+            if (rs != null && rs.next()) {
+                // Raccogliamo tutti i dati per popolare la ProfiloView
+                String cf = rs.getString("codiceFiscale");
+                String nome = rs.getString("nome");
+                String cognome = rs.getString("cognome");
+                String sesso = rs.getString("sesso");
+                String nomeDarte = rs.getString("nomeDarte");
+                String email = rs.getString("email");
+
+                // Memorizziamo l'entità per fargliela leggere nella ProfiloView
+                artistaDaVisualizzare = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, null, null);
+
+                // 4. VisualizzaProfiliCtrl crea ProfiloView.
+                Router.mostraProfiloView(event);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) {
+                    java.sql.Statement stmt = rs.getStatement();
+                    if (stmt != null) stmt.close();
+                }
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // ==========================================
+    // METODI DI ROUTING E SERVIZIO GLOBALI
+    // ==========================================
+
     @FXML
     void mostraCercaArtistaView(ActionEvent event) {
         Router.mostraCercaArtistaView(event);

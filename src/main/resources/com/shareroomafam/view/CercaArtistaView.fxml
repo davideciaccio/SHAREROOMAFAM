@@ -13,7 +13,7 @@
 
     <HBox spacing="10.0" alignment="CENTER">
         <TextField fx:id="ricercaField" promptText="Es. Michelangelo..." HBox.hgrow="ALWAYS" />
-        <Button text="Filtra ⚙️" style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
+        <Button text="Filtra ⚙️" onAction="#cliccaIconaFiltra" style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
     </HBox>
 
     <Button mnemonicParsing="false" onAction="#cliccaCerca" maxWidth="Infinity" text="Cerca" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;" />

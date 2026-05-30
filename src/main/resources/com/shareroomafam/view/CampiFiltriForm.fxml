@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.VisualizzaProfiliCtrl" prefWidth="500.0" prefHeight="400.0">
+    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+
+    <Label text="Filtra per Dati Artistici">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    <Label text="Imposta i criteri per trovare l'artista ideale" textFill="#555555" />
+
+    <VBox spacing="5.0">
+        <Label text="Carriera / Specializzazione:" />
+        <TextField fx:id="carrieraFiltroField" promptText="Es. Pittore, Musicista..." />
+    </VBox>
+
+    <VBox spacing="5.0">
+        <Label text="Anni di Carriera minimi:" />
+        <TextField fx:id="anniCarrieraFiltroField" promptText="Es. 5" />
+    </VBox>
+
+    <Button mnemonicParsing="false" onAction="#cliccaFiltra" maxWidth="Infinity" text="Filtra" style="-fx-background-color: #28A745; -fx-text-fill: white; -fx-font-weight: bold;" />
+
+    <Button mnemonicParsing="false" onAction="#mostraCercaArtistaView" maxWidth="Infinity" text="Annulla" />
+</VBox>

@@ -176,4 +176,19 @@ public class DBMSboundary {
         String searchPattern = "%" + keyword + "%";
         return queryDBMS(sql, searchPattern, searchPattern, searchPattern);
     }
+
+    // --- METODI PER SEQUENCE VISUALIZZA PROFILI (Filtra per dati artistici) ---
+
+    public ResultSet queryDBMSFiltraArtisti(String carriera, int anniDiCarriera) throws SQLException {
+        // Unisce la tabella ARTISTA e CARRIERA per trovare le corrispondenze (cerca anni di carriera maggiori o uguali al filtro)
+        String sql = "SELECT A.*, C.tipologia, C.anni FROM ARTISTA A JOIN CARRIERA C ON A.codiceFiscale = C.codiceFiscale_artista WHERE C.tipologia LIKE ? AND C.anni >= ?";
+        String paramCarriera = "%" + (carriera != null ? carriera : "") + "%";
+        return queryDBMS(sql, paramCarriera, anniDiCarriera);
+    }
+
+    // --- METODI PER SEQUENCE VISUALIZZA PROFILI (Visualizza) ---
+    public ResultSet queryDBMSProfiloArtista(String codiceFiscale) throws SQLException {
+        String sql = "SELECT * FROM ARTISTA WHERE codiceFiscale = ?";
+        return queryDBMS(sql, codiceFiscale);
+    }
 }

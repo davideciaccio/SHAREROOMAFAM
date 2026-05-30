@@ -75,4 +75,12 @@ public class Router {
     public static void mostraListaArtistiView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ListaArtistiView.fxml", "ShareRoom AFAM - Risultati Ricerca");
     }
+
+    public static void mostraCampiFiltriForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/CampiFiltriForm.fxml", "ShareRoom AFAM - Filtra Artisti");
+    }
+
+    public static void mostraProfiloView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ProfiloView.fxml", "ShareRoom AFAM - Profilo Artista");
+    }
 }
