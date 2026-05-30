@@ -67,4 +67,12 @@ public class Router {
     public static void mostraPasswordView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/MostraPasswordView.fxml", "ShareRoom AFAM - La tua Password");
     }
+
+    public static void mostraCercaArtistaView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/CercaArtistaView.fxml", "ShareRoom AFAM - Cerca Artista");
+    }
+
+    public static void mostraListaArtistiView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ListaArtistiView.fxml", "ShareRoom AFAM - Risultati Ricerca");
+    }
 }

@@ -513,7 +513,13 @@ public class AuthCtrl {
     }
 
 
-    @FXML void apriVisualizzaProfili(ActionEvent event) {}
+    // 1. L'utente cliccaVisualizzaProfili() dentro AuthView.
+    @FXML
+    void cliccaVisualizzaProfili(ActionEvent event) {
+        // AuthCtrl dice al Router di caricare la nuova View,
+        // che a sua volta (in automatico) creerà il VisualizzaProfiliCtrl (Passo 2)
+        com.shareroomafam.utility.Router.mostraCercaArtistaView(event);
+    }
 
 
     // ==========================================

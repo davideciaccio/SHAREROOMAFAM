@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.VisualizzaProfiliCtrl" prefWidth="500.0" prefHeight="400.0">
+    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+
+    <Label text="Cerca Artista">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    <Label text="Cerca per nome d'arte, nome o cognome" textFill="#555555" />
+
+    <HBox spacing="10.0" alignment="CENTER">
+        <TextField fx:id="ricercaField" promptText="Es. Michelangelo..." HBox.hgrow="ALWAYS" />
+        <Button text="Filtra ⚙️" style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
+    </HBox>
+
+    <Button mnemonicParsing="false" onAction="#cliccaCerca" maxWidth="Infinity" text="Cerca" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;" />
+
+    <Button mnemonicParsing="false" onAction="#tornaAlLogin" text="Torna al Login" />
+</VBox>

@@ -167,4 +167,13 @@ public class DBMSboundary {
         String sql = "SELECT password FROM ARTISTA WHERE email = ?";
         return queryDBMS(sql, email);
     }
+
+    // --- METODI PER SEQUENCE VISUALIZZA PROFILI (Cerca Artista) ---
+
+    public ResultSet queryDBMSCercaArtista(String keyword) throws SQLException {
+        // Cerca corrispondenze nel nome d'arte, nel nome o nel cognome
+        String sql = "SELECT * FROM ARTISTA WHERE nomeDarte LIKE ? OR nome LIKE ? OR cognome LIKE ?";
+        String searchPattern = "%" + keyword + "%";
+        return queryDBMS(sql, searchPattern, searchPattern, searchPattern);
+    }
 }
