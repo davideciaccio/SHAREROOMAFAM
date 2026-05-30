@@ -143,4 +143,10 @@ public class DBMSboundary {
         String sql = "SELECT * FROM ARTISTA WHERE email = ? AND codiceVerifica = ?";
         return queryDBMS(sql, email, codice);
     }
+
+    // 10. AuthCtrl fa una queryDBMSVerificaEsistenzaAccount() alla DBMS boundary
+    public ResultSet queryDBMSVerificaEsistenzaAccount(String email) throws SQLException {
+        String sql = "SELECT * FROM ARTISTA WHERE email = ?";
+        return queryDBMS(sql, email);
+    }
 }

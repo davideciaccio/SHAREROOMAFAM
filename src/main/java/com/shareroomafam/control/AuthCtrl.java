@@ -8,6 +8,7 @@ import com.shareroomafam.utility.EmailSender;
 import com.shareroomafam.utility.Router;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -19,7 +20,8 @@ import java.util.Random;
 public class AuthCtrl {
 
     // --- VARIABILE DI STATO GLOBALE PER IL LOGIN 2FA ---
-    private static String emailInAttesaDiVerifica;
+    private static String emailInAttesaDiVerifica;  // Per Login 2FA
+    private static String enteSpidSelezionato;     // Per Login SPID
 
     // ==========================================
     // CAMPI FXML
@@ -43,6 +45,22 @@ public class AuthCtrl {
     @FXML private TextField anniCarrieraField;
     @FXML private TextField emailRegField; // Differenziato dal login
     @FXML private PasswordField passwordRegField; // Differenziato dal login
+
+    // Campi AccessoConSpidMenuView e AccessoConSPIDForm
+    @FXML private ComboBox<String> enteSpidCombo;
+    @FXML private TextField emailSpidField;
+    @FXML private PasswordField passwordSpidField;
+
+    // ==========================================
+    // INIZIALIZZAZIONE VISTE
+    // ==========================================
+    @FXML
+    public void initialize() {
+        // Popola la tendina dello SPID se la vista è AccessoConSpidMenuView
+        if (enteSpidCombo != null) {
+            enteSpidCombo.getItems().addAll("Poste ID", "InfoCert ID", "Sielte ID", "Namirial ID", "Aruba ID");
+        }
+    }
 
 
     // ==========================================
@@ -259,6 +277,100 @@ public class AuthCtrl {
 
 
     // ==========================================
+    // SEQUENCE: ESEGUI ACCESSO CON SPID
+    // ==========================================
+
+    // 1. L'artista cliccaEseguiAccessoconSPID() nella aAuthView
+    @FXML
+    void cliccaEseguiAccessoconSPID(ActionEvent event) {
+        // 1.1 AuthView crea AuthCtrl (Gestito dal Controller di JavaFX)
+        // 2. AuthCtrl crea AccessoConSpidMenuView
+        com.shareroomafam.utility.Router.mostraAccessoConSpidMenuView(event);
+    }
+
+    // 3. L'artista selezionaEnteSPID() dentro AccessoConSpidMenuView
+    @FXML
+    void selezionaEnteSPID(ActionEvent event) {
+        String enteScelto = enteSpidCombo.getValue();
+        if (enteScelto == null) {
+            ErrorText err = new ErrorText("Seleziona un Ente SPID.");
+            err.okay();
+            return;
+        }
+        // 3.1 AccessoConSpidMenuView invoca il metodo passaDatiEnteSPID() alla AuthCtrl
+        passaDatiEnteSPID(event, enteScelto);
+    }
+
+    private void passaDatiEnteSPID(ActionEvent event, String ente) {
+        enteSpidSelezionato = ente;
+        // segue destroy di AccessoConSpidMenuView (Il router rimuove la scena precedente)
+        // 5. AuthCtrl crea AccessoConSPIDForm
+        com.shareroomafam.utility.Router.mostraAccessoConSPIDForm(event);
+    }
+
+    // 6. L'artista inserisciEmailSPID() e 7. inserisciPasswordSPID() per poi cliccare Invia
+    @FXML
+    void cliccaInviaSPID(ActionEvent event) {
+        String emailSPID = emailSpidField.getText();
+        String passwordSPID = passwordSpidField.getText();
+
+        // 8. AccessoConSPIDForm fa un passaDatiCredenzialiSPID(emailSPID, passwordSPID) all'AuthCtrl
+        passaDatiCredenzialiSPID(event, emailSPID, passwordSPID);
+    }
+
+    private void passaDatiCredenzialiSPID(ActionEvent event, String email, String password) {
+        ResultSet rs = null;
+        try {
+            // 9. AuthCtrl fa una queryVerificaEsistenzaAccountSPID() all'EnteSPIDboundary
+            boolean autenticazioneSpidRiuscita = com.shareroomafam.boundary.EnteSPIDboundary.getInstance().queryVerificaEsistenzaAccountSPID(enteSpidSelezionato, email, password);
+
+            // 10. AuthCtrl fa una queryDBMSVerificaEsistenzaAccount() alla DBMS boundary
+            rs = DBMSboundary.getInstance().queryDBMSVerificaEsistenzaAccount(email);
+            boolean accountEsisteNelDBMS = false;
+            if (rs != null && rs.next()) {
+                accountEsisteNelDBMS = true;
+            }
+
+            // 11. IF Risposta autenticazione spid fallita O account non esiste nella piattaforma
+            if (!autenticazioneSpidRiuscita || !accountEsisteNelDBMS) {
+                // 11.1 AuthCtrl crea ErrorText, segue Artista cliccaokay(), segue destroy
+                ErrorText errorText = new ErrorText("Autenticazione fallita");
+                errorText.okay();
+
+                // segue authCtrl invoca il metodo mostraAuthView()
+                mostraAuthView(event);
+            } else {
+                // 12. ALTRIMENTI
+                // 12.1 AuthCtrl crea ArtistaEntity
+                String cf = rs.getString("codiceFiscale");
+                String nome = rs.getString("nome");
+                String cognome = rs.getString("cognome");
+                String sesso = rs.getString("sesso");
+                String nomeDarte = rs.getString("nomeDarte");
+
+                Artista artista = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, null, null);
+                System.out.println("✅ Accesso SPID verificato per: " + artista.getNome() + " " + artista.getCognome());
+
+                // 12.2 AuthCtrl invoca il metodo mostraHomePageArtistaView()
+                mostraHomePageArtistaView(event);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) {
+                    java.sql.Statement stmt = rs.getStatement();
+                    if (stmt != null) stmt.close();
+                }
+            } catch (Exception ignore) {}
+        }
+    }
+
+    @FXML void apriRecuperoPassword(ActionEvent event) {}
+    @FXML void apriVisualizzaProfili(ActionEvent event) {}
+
+
+    // ==========================================
     // METODI GLOBALI / UTILITY / STUB
     // ==========================================
 
@@ -270,9 +382,4 @@ public class AuthCtrl {
     void mostraHomePageArtistaView(ActionEvent event) {
         com.shareroomafam.utility.Router.mostraHomePageArtistaView(event);
     }
-
-    // Metodi vuoti per i pulsanti secondari non ancora implementati della AuthView
-    @FXML void handleSpidLogin(ActionEvent event) {}
-    @FXML void apriRecuperoPassword(ActionEvent event) {}
-    @FXML void apriVisualizzaProfili(ActionEvent event) {}
 }

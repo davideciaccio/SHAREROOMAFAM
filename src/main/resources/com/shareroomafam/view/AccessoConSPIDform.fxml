@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.AuthCtrl" prefWidth="400.0" prefHeight="400.0">
+    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+    <Label text="Accesso con SPID">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    <VBox spacing="5.0">
+        <Label text="Email SPID:" />
+        <TextField fx:id="emailSpidField" promptText="Inserisci email SPID..." />
+    </VBox>
+    <VBox spacing="5.0">
+        <Label text="Password SPID:" />
+        <PasswordField fx:id="passwordSpidField" promptText="La password simulata è spid123" />
+    </VBox>
+    <Button mnemonicParsing="false" onAction="#cliccaInviaSPID" maxWidth="Infinity" text="Invia" style="-fx-background-color: #0066CC; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <Button mnemonicParsing="false" onAction="#mostraAuthView" maxWidth="Infinity" text="Annulla e Torna al Login" />
+</VBox>

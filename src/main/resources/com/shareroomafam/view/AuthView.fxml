@@ -33,7 +33,7 @@
 
     <Button fx:id="loginButton" mnemonicParsing="false" onAction="#cliccaAccedi" maxWidth="Infinity" text="Accedi" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
 
-    <Button mnemonicParsing="false" onAction="#handleSpidLogin" maxWidth="Infinity" text="Esegui accesso con SPID" style="-fx-background-color: #0066CC; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <Button mnemonicParsing="false" onAction="#cliccaEseguiAccessoconSPID" maxWidth="Infinity" text="Esegui accesso con SPID" style="-fx-background-color: #0066CC; -fx-text-fill: white; -fx-font-weight: bold;"/>
 
     <Label fx:id="errorLabel" textFill="RED" wrapText="true" />
 

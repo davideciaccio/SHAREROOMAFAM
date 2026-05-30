@@ -47,4 +47,12 @@ public class Router {
     public static void mostraHomePageArtistaView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/HomePageArtistaView.fxml", "ShareRoom AFAM - Homepage");
     }
+
+    public static void mostraAccessoConSpidMenuView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/AccessoConSpidMenuView.fxml", "ShareRoom AFAM - Scegli Provider SPID");
+    }
+
+    public static void mostraAccessoConSPIDForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/AccessoConSPIDForm.fxml", "ShareRoom AFAM - Login SPID");
+    }
 }
