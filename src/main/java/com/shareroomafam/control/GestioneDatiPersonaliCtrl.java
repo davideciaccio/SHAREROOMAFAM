@@ -7,6 +7,7 @@ import com.shareroomafam.utility.Router;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 
 import java.sql.ResultSet;
 
@@ -15,8 +16,11 @@ public class GestioneDatiPersonaliCtrl {
     // Casella di testo del ModificaPasswordForm
     @FXML private PasswordField nuovaPasswordField;
 
+    // Casella di testo del ModificaNomeArteForm
+    @FXML private TextField nuovoNomeArteField;
+
     // ==========================================
-    // SEQUENCE: Gestione dati personali - Cambia password
+    // SEQUENCE: Gestione profilo - Gestione dati personali - Cambia password
     // ==========================================
 
     // 1. L'artista cliccaCambiaPassword() dentro GestioneDatiPersonaliVIew
@@ -103,6 +107,91 @@ public class GestioneDatiPersonaliCtrl {
         }
     }
 
+    // ==========================================
+    // SEQUENCE: Gestione profilo - Gestione dati personali - Modifica nome d'arte
+    // ==========================================
+
+    // 1. L'artista cliccaModificaNomeArte() su GestioneDatiPersonaliView
+    @FXML
+    void cliccaModificaNomeArte(ActionEvent event) {
+        // 2. GestioneDatiPersonaliView crea GestioneDatiPersonaliCtrl (Automatico da JavaFX)
+        // 3. GestioneDatiPersonaliCtrl crea ModificaNomeArteForm
+        Router.mostraModificaNomeArteForm(event);
+    }
+
+    // 5. L'artista cliccaConferma() [Nominato cliccaConfermaNomeArte per evitare conflitti con la password]
+    @FXML
+    void cliccaConfermaNomeArte(ActionEvent event) {
+        // 4. L'artista InserisciNuovoNomeArte() dentro ModificaNomeArteForm
+        String nuovoNomeArte = nuovoNomeArteField.getText();
+
+        if (nuovoNomeArte == null || nuovoNomeArte.trim().isEmpty()) {
+            ErrorText errorText = new ErrorText("Il nome d'arte non può essere vuoto.");
+            errorText.okay();
+            return;
+        }
+
+        // 6. ModificaNomeArteForm fa il passaDatinuovoNomeArte() alla GestioneDatiPersonaliCtrl
+        passaDatinuovoNomeArte(event, nuovoNomeArte.trim());
+    }
+
+    private void passaDatinuovoNomeArte(ActionEvent event, String nuovoNomeArte) {
+        ResultSet rs = null;
+        try {
+            if (GestioneProfiloCtrl.artistaLoggato == null) {
+                new ErrorText("Errore di sessione. Riprova ad accedere.").okay();
+                Router.mostraAuthView(event);
+                return;
+            }
+
+            String cf = GestioneProfiloCtrl.artistaLoggato.getCodiceFiscale();
+
+            // 7. GestioneDatiPersonaliCtrl fa una queryDBMSVerificaNomeArte() alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSVerificaNomeArte(nuovoNomeArte);
+
+            boolean nomeGiaInUso = false;
+            if (rs != null && rs.next()) {
+                nomeGiaInUso = true;
+            }
+
+            // 8. IF nuovoNomeArte già in uso
+            if (nomeGiaInUso) {
+                // 8.1 GestioneDatiPersonaliCtrl crea un ErrorText, segue Artista cliccaOkay(), segue destroy
+                ErrorText errorText = new ErrorText("Nome d’arte già in uso");
+                errorText.okay();
+
+                // segue invocazione del metodo mostraGestioneDatiPersonaliView().
+                mostraGestioneDatiPersonaliView(event);
+            } else {
+                // 9. ELSE nuovoNomeArte non in uso
+
+                // 9.1 GestioneDatiPersonaliCtrl fa un updateDBMSNomeArte() aggiornando il nome d'arte dell'artista
+                DBMSboundary.getInstance().updateDBMSNomeArte(cf, nuovoNomeArte);
+
+                // 9.2 GestioneDatiPersonaliCtrl fa setDati(nuovoNomeArte) sull'artista Entity
+                // (Usiamo il setter specifico dell'entità allocata in memoria)
+                GestioneProfiloCtrl.artistaLoggato.setNomeDarte(nuovoNomeArte);
+
+                // 9.3 GestioneDatiPersonaliCtrl crea SuccessfulText, l'artista cliccaOkay()
+                SuccessfulText successText = new SuccessfulText("Nome d’arte aggiornato correttamente");
+                successText.okay();
+
+                // 9.4 GestioneDatiPersonaliCtrl invoca il metodo mostraGestioneDatiPersonaliView().
+                mostraGestioneDatiPersonaliView(event);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) {
+                    java.sql.Statement stmt = rs.getStatement();
+                    if (stmt != null) stmt.close();
+                }
+            } catch (Exception ignore) {}
+        }
+    }
+
 
     // ==========================================
     // METODI DI ROUTING E SERVIZIO GLOBALI
@@ -120,6 +209,5 @@ public class GestioneDatiPersonaliCtrl {
 
     // Stub pronti per i futuri Sequence Diagram del RAD
     @FXML void cliccaModificaImmagine(ActionEvent event) {}
-    @FXML void cliccaModificaNomeDarte(ActionEvent event) {}
     @FXML void cliccaModificaCarriera(ActionEvent event) {}
 }

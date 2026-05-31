@@ -15,7 +15,7 @@
 
     <Button mnemonicParsing="false" onAction="#cliccaModificaImmagine" text="Modifica immagine profilo" maxWidth="250" style="-fx-padding: 10px;"/>
     <Button mnemonicParsing="false" onAction="#cliccaCambiaPassword" text="Cambia password" maxWidth="250" style="-fx-padding: 10px;"/>
-    <Button mnemonicParsing="false" onAction="#cliccaModificaNomeDarte" text="Modifica nome d'arte" maxWidth="250" style="-fx-padding: 10px;"/>
+    <Button mnemonicParsing="false" onAction="#cliccaModificaNomeArte" text="Modifica nome d'arte" maxWidth="250" style="-fx-padding: 10px;"/>
     <Button mnemonicParsing="false" onAction="#cliccaModificaCarriera" text="Modifica carriera" maxWidth="250" style="-fx-padding: 10px;"/>
 
     <Separator prefWidth="200.0" />

@@ -212,4 +212,18 @@ public class DBMSboundary {
         String sql = "UPDATE ARTISTA SET password = ? WHERE codiceFiscale = ?";
         return insertDBMS(sql, nuovaPassword, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE GESTIONE DATI PERSONALI (Modifica Nome d'Arte) ---
+
+    public ResultSet queryDBMSVerificaNomeArte(String nomeDarte) throws SQLException {
+        // Cerca se esiste già un artista con questo specifico nome d'arte
+        String sql = "SELECT * FROM ARTISTA WHERE nomeDarte = ?";
+        return queryDBMS(sql, nomeDarte);
+    }
+
+    public int updateDBMSNomeArte(String codiceFiscale, String nuovoNomeArte) throws SQLException {
+        // Aggiorna il nome d'arte dell'artista corrente
+        String sql = "UPDATE ARTISTA SET nomeDarte = ? WHERE codiceFiscale = ?";
+        return insertDBMS(sql, nuovoNomeArte, codiceFiscale);
+    }
 }

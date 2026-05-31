@@ -95,4 +95,8 @@ public class Router {
     public static void mostraModificaPasswordForm(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ModificaPasswordForm.fxml", "ShareRoom AFAM - Cambia Password");
     }
+
+    public static void mostraModificaNomeArteForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaNomeArteForm.fxml", "ShareRoom AFAM - Modifica Nome d'Arte");
+    }
 }
