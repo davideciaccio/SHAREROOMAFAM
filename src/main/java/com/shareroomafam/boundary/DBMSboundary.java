@@ -247,4 +247,21 @@ public class DBMSboundary {
         String sql = "DELETE FROM CARRIERA WHERE idCarriera = ?";
         return insertDBMS(sql, idCarriera);
     }
+
+    // --- METODI PER SEQUENCE MODIFICA IMMAGINE PROFILO ---
+
+    public int queryDBMSUpdateImmagineProfilo(String codiceFiscale, String urlImmagine) throws SQLException {
+        // Aggiorna l'URL/percorso dell'immagine per lo specifico artista
+        String sql = "UPDATE ARTISTA SET urlImmagineProfilo = ? WHERE codiceFiscale = ?";
+        return insertDBMS(sql, urlImmagine, codiceFiscale); // Usiamo insertDBMS perché fa l'UPDATE
+    }
+
+    // --- METODO PER SEQUENCE MODIFICA IMMAGINE (Rimuovi Immagine / Default) ---
+
+    public int updateDBMSDefaultImageProfile(String codiceFiscale) throws SQLException {
+        // Inserisce il percorso dell'immagine di default nella tupla dell'artista
+        String defaultPath = "src/main/resources/default_profile.png";
+        String sql = "UPDATE ARTISTA SET urlImmagineProfilo = ? WHERE codiceFiscale = ?";
+        return insertDBMS(sql, defaultPath, codiceFiscale);
+    }
 }

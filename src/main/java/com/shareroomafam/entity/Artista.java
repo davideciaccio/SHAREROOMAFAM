@@ -60,4 +60,9 @@ public class Artista {
         this.password = password;
         this.urlImmagineProfilo = urlImmagineProfilo;
     }
+
+    // Metodo per impostare l'immagine di default
+    public void setDefaultImageProfile() {
+        this.urlImmagineProfilo = "src/main/resources/default_profile.png";
+    }
 }

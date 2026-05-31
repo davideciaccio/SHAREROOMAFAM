@@ -12,11 +12,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,6 +98,23 @@ public class VisualizzaProfiliCtrl {
             profiloCognomeLabel.setText(artistaDaVisualizzare.getCognome());
             profiloSessoLabel.setText(artistaDaVisualizzare.getSesso());
             profiloEmailLabel.setText(artistaDaVisualizzare.getEmail());
+
+            // --- CARICAMENTO IMMAGINE PROFILO ---
+            String pathImmagine = artistaDaVisualizzare.getUrlImmagineProfilo();
+            if (pathImmagine != null && !pathImmagine.trim().isEmpty()) {
+                try {
+                    File fileImmagine = new File(pathImmagine);
+                    if (fileImmagine.exists()) {
+                        // JavaFX richiede un URI formattato per caricare file locali
+                        Image image = new Image(fileImmagine.toURI().toString());
+                        profiloImmagine.setImage(image);
+                    } else {
+                        System.out.println("Immagine non trovata nel percorso: " + pathImmagine);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Impossibile caricare l'immagine del profilo.");
+                }
+            }
             // Task 2: La lista documenti attualmente risulterà vuota
             if (documentiListView != null) {
                 documentiListView.getItems().clear();
@@ -277,9 +296,10 @@ public class VisualizzaProfiliCtrl {
                 String sesso = rs.getString("sesso");
                 String nomeDarte = rs.getString("nomeDarte");
                 String email = rs.getString("email");
+                String urlImmagine = rs.getString("urlImmagineProfilo");
 
                 // Memorizziamo l'entità per fargliela leggere nella ProfiloView
-                artistaDaVisualizzare = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, null, null);
+                artistaDaVisualizzare = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, null, urlImmagine);
 
                 // 4. VisualizzaProfiliCtrl crea ProfiloView.
                 Router.mostraProfiloView(event);

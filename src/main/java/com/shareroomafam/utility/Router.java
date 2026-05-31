@@ -111,4 +111,8 @@ public class Router {
     public static void mostraListaCarriereView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ListaCarriereView.fxml", "ShareRoom AFAM - Rimuovi Carriere");
     }
+
+    public static void mostraModificaImmagineProfiloView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaImmagineProfiloView.fxml", "ShareRoom AFAM - Modifica Immagine Profilo");
+    }
 }

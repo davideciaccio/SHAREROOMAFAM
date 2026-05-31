@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.ModificaImmagineProfiloCtrl" prefWidth="500.0" prefHeight="400.0">
+    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+
+    <Label text="Modifica Immagine Profilo">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    <Label text="Gestisci la foto associata al tuo account" textFill="#555555" />
+
+    <Button mnemonicParsing="false" onAction="#cliccaAggiungiImmagine" text="Aggiungi immagine" maxWidth="250" style="-fx-padding: 10px; -fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <Button mnemonicParsing="false" onAction="#cliccaRimuoviImmagine" text="Rimuovi immagine" maxWidth="250" style="-fx-padding: 10px; -fx-text-fill: red;"/>
+
+    <Separator prefWidth="200.0" />
+    <Button mnemonicParsing="false" onAction="#tornaAGestioneDatiPersonali" text="Torna Indietro" maxWidth="250" style="-fx-padding: 10px;"/>
+</VBox>

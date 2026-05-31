@@ -275,10 +275,12 @@ public class AuthCtrl {
 
                 // 6.3 Vengono settati i dati all'artista entity grazie al metodo SetDati
                 artista.setDati(cf, nome, cognome, dataNascita.atStartOfDay(), sesso, nomeDarte, email, password, null);
-
+                // Set dell'immagine di default nell'Entity ---
+                artista.setDefaultImageProfile();
                 // 6.1 Authctrl invoca il metodo InsertDBMSCreaProfilo() alla DBMS Boundary
                 DBMSboundary.getInstance().InsertDBMSCreaProfilo(cf, nome, cognome, java.sql.Date.valueOf(dataNascita), sesso, nomeDarte, email, password, carriera, anniCarriera);
-
+                // Aggiornamento del DB con l'immagine di default ---
+                DBMSboundary.getInstance().updateDBMSDefaultImageProfile(cf);
                 // 6.4 AuthControl genera un Successful text()
                 SuccessfulText successText = new SuccessfulText("Registrazione effettuata correttamente");
 
