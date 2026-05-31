@@ -40,6 +40,7 @@ public class VisualizzaProfiliCtrl {
     @FXML private Label profiloCognomeLabel;
     @FXML private Label profiloSessoLabel;
     @FXML private Label profiloEmailLabel;
+    @FXML private Label profiloCarriereLabel;
     @FXML private ImageView profiloImmagine;
     @FXML private ListView<String> documentiListView;
 
@@ -121,6 +122,7 @@ public class VisualizzaProfiliCtrl {
                     System.out.println("Impossibile caricare l'immagine del profilo.");
                 }
             }
+
             // --- CARICAMENTO E GESTIONE DOCUMENTI PUBBLICI (VISIBILI) ---
             if (documentiListView != null) {
                 documentiListView.getItems().clear();
@@ -139,7 +141,7 @@ public class VisualizzaProfiliCtrl {
                             File fileDoc = new File(percorso);
                             String testoItem = "📄 " + fileDoc.getName();
 
-                            // Aggiungiamo alla vista e alla mappa segreta
+                            // Aggiungiamo alla vista e alla mappa
                             documentiListView.getItems().add(testoItem);
                             mappaDocumenti.put(testoItem, percorso);
                         }
@@ -167,6 +169,42 @@ public class VisualizzaProfiliCtrl {
                         }
                     }
                 });
+            }
+
+            // --- CARICAMENTO CARRIERE ---
+            if (profiloCarriereLabel != null) {
+                ResultSet rsCarriere = null;
+                try {
+                    // Sfruttiamo la query che avevamo già creato per ModificaCarrieraCtrl
+                    rsCarriere = DBMSboundary.getInstance().queryDBMSListaCarriere(artistaDaVisualizzare.getCodiceFiscale());
+
+                    StringBuilder carriereStr = new StringBuilder();
+                    boolean haCarriere = false;
+
+                    if (rsCarriere != null) {
+                        while (rsCarriere.next()) {
+                            haCarriere = true;
+                            String tipo = rsCarriere.getString("tipologia");
+                            int anni = rsCarriere.getInt("anni");
+
+                            if (carriereStr.length() > 0) carriereStr.append(", ");
+                            carriereStr.append(tipo).append(" (").append(anni).append(" anni)");
+                        }
+                    }
+
+                    if (haCarriere) {
+                        profiloCarriereLabel.setText(carriereStr.toString());
+                    } else {
+                        profiloCarriereLabel.setText("Nessuna carriera registrata.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    profiloCarriereLabel.setText("Errore caricamento carriere.");
+                } finally {
+                    try {
+                        if (rsCarriere != null && !rsCarriere.isClosed()) rsCarriere.getStatement().close();
+                    } catch (Exception ignore) {}
+                }
             }
         }
     }

@@ -29,6 +29,9 @@
 
         <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
         <Label fx:id="profiloEmailLabel" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+        <Label text="Carriere:" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold;"/>
+        <Label fx:id="profiloCarriereLabel" GridPane.columnIndex="1" GridPane.rowIndex="5" wrapText="true" maxWidth="200" />
     </GridPane>
 
     <VBox spacing="5.0" VBox.vgrow="ALWAYS">
