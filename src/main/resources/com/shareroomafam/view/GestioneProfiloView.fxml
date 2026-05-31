@@ -14,7 +14,7 @@
     <Label text="Seleziona l'operazione desiderata" textFill="#555555" />
 
     <Button mnemonicParsing="false" onAction="#cliccaGestioneDatiPersonali" text="Gestione dati personali" maxWidth="250" style="-fx-padding: 10px;"/>
-    <Button mnemonicParsing="false" text="Gestisci documenti" maxWidth="250" style="-fx-padding: 10px;"/>
+    <Button mnemonicParsing="false" onAction="#cliccaGestisciDocumenti" text="Gestisci documenti" maxWidth="250" style="-fx-padding: 10px;"/>
     <Button mnemonicParsing="false" onAction="#cliccaCancellaProfilo" text="Cancella profilo" maxWidth="250" style="-fx-padding: 10px; -fx-text-fill: red;"/>
 
     <Button mnemonicParsing="false" onAction="#cliccaDisconnettiProfilo" text="Disconnetti profilo" maxWidth="250" style="-fx-padding: 10px; -fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold;"/>

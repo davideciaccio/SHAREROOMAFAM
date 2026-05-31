@@ -115,4 +115,12 @@ public class Router {
     public static void mostraModificaImmagineProfiloView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ModificaImmagineProfiloView.fxml", "ShareRoom AFAM - Modifica Immagine Profilo");
     }
+
+    public static void mostraGestisciDocumentiView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/GestisciDocumentiView.fxml", "ShareRoom AFAM - Gestisci Documenti");
+    }
+
+    public static void mostraDocumentiAggiuntiChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/DocumentiAggiuntiChecklist.fxml", "ShareRoom AFAM - Checklist Documenti");
+    }
 }

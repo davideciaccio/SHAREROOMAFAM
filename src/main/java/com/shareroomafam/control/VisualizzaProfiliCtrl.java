@@ -18,10 +18,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VisualizzaProfiliCtrl {
 
@@ -46,6 +49,9 @@ public class VisualizzaProfiliCtrl {
 
     // Lista statica per passare i dati dei risultati tra la schermata di ricerca e la schermata della lista
     private static List<String[]> risultatiRicercaTemporanei = new ArrayList<>();
+
+    // Mappa per collegare il testo visualizzato nella lista al percorso reale del file
+    private Map<String, String> mappaDocumenti = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -115,10 +121,52 @@ public class VisualizzaProfiliCtrl {
                     System.out.println("Impossibile caricare l'immagine del profilo.");
                 }
             }
-            // Task 2: La lista documenti attualmente risulterà vuota
+            // --- CARICAMENTO E GESTIONE DOCUMENTI PUBBLICI (VISIBILI) ---
             if (documentiListView != null) {
                 documentiListView.getItems().clear();
-                documentiListView.getItems().add("Nessun documento caricato.");
+                mappaDocumenti.clear(); // Pulisce la memoria precedente
+
+                ResultSet rsDocs = null;
+                try {
+                    rsDocs = DBMSboundary.getInstance().queryDBMSDocumentiVisibili(artistaDaVisualizzare.getCodiceFiscale());
+                    boolean haDocumenti = false;
+
+                    if (rsDocs != null) {
+                        while (rsDocs.next()) {
+                            haDocumenti = true;
+                            String percorso = rsDocs.getString("percorso");
+
+                            File fileDoc = new File(percorso);
+                            String testoItem = "📄 " + fileDoc.getName();
+
+                            // Aggiungiamo alla vista e alla mappa segreta
+                            documentiListView.getItems().add(testoItem);
+                            mappaDocumenti.put(testoItem, percorso);
+                        }
+                    }
+
+                    if (!haDocumenti) {
+                        documentiListView.getItems().add("Nessun documento pubblico caricato.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    documentiListView.getItems().add("Errore nel caricamento documenti.");
+                } finally {
+                    try {
+                        if (rsDocs != null && !rsDocs.isClosed()) rsDocs.getStatement().close();
+                    } catch (Exception ignore) {}
+                }
+
+                // NUOVO: Aggiungiamo il listener per aprire il file con il DOPPIO CLIC
+                documentiListView.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2) {
+                        String itemSelezionato = documentiListView.getSelectionModel().getSelectedItem();
+                        // Controlla se la riga cliccata è davvero un documento mappato
+                        if (itemSelezionato != null && mappaDocumenti.containsKey(itemSelezionato)) {
+                            apriDocumentoConOS(mappaDocumenti.get(itemSelezionato));
+                        }
+                    }
+                });
             }
         }
     }
@@ -329,5 +377,27 @@ public class VisualizzaProfiliCtrl {
     @FXML
     void tornaAlLogin(ActionEvent event) {
         Router.mostraAuthView(event);
+    }
+
+    /**
+     * Metodo privato di servizio per chiamare l'OS e fargli aprire il file.
+     */
+    private void apriDocumentoConOS(String percorsoAssoluto) {
+        try {
+            File fileDaAprire = new File(percorsoAssoluto);
+            if (fileDaAprire.exists()) {
+                // Sfrutta la classe Desktop nativa di Java per delegare l'apertura a Windows/Mac
+                if (Desktop.isDesktopSupported()) {
+                    Desktop.getDesktop().open(fileDaAprire);
+                } else {
+                    System.out.println("L'apertura nativa dei file non è supportata su questo sistema.");
+                }
+            } else {
+                new ErrorText("Il file non è più presente nel percorso specificato.").okay();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Impossibile aprire il file. Controlla i permessi o i programmi predefiniti.").okay();
+        }
     }
 }

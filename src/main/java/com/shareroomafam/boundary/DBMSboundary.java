@@ -264,4 +264,20 @@ public class DBMSboundary {
         String sql = "UPDATE ARTISTA SET urlImmagineProfilo = ? WHERE codiceFiscale = ?";
         return insertDBMS(sql, defaultPath, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE GESTISCI DOCUMENTI (Carica Documenti) ---
+
+    public int queryDBMSInsertDocumenti(String codiceFiscale, boolean visibile, String percorso) throws SQLException {
+        // Inserisce il nuovo documento nel database con il suo stato di visibilità
+        String sql = "INSERT INTO DOCUMENTO (codiceFiscale_artista, visibile, percorso) VALUES (?, ?, ?)";
+        return insertDBMS(sql, codiceFiscale, visibile, percorso);
+    }
+
+    // --- METODI PER VISUALIZZAZIONE DOCUMENTI PUBBLICI ---
+
+    public ResultSet queryDBMSDocumentiVisibili(String codiceFiscale) throws SQLException {
+        // Estrae solo i documenti dell'artista impostati come "visibili" (visibile = 1 in MySQL)
+        String sql = "SELECT * FROM DOCUMENTO WHERE codiceFiscale_artista = ? AND visibile = 1";
+        return queryDBMS(sql, codiceFiscale);
+    }
 }

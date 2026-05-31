@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.GestisciDocumentiCtrl" prefWidth="500.0" prefHeight="450.0">
+    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+
+    <Label text="Checklist Documenti">
+        <font><Font name="System Bold" size="24.0" /></font>
+    </Label>
+    <Label text="Spunta la casella per rendere il documento VISIBILE a tutti." textFill="#555555" />
+    <Label text="Lascia vuota la casella per mantenerlo PRIVATO." textFill="#555555" />
+
+    <ListView fx:id="documentiChecklistView" VBox.vgrow="ALWAYS" />
+
+    <Button mnemonicParsing="false" onAction="#cliccaConferma" maxWidth="Infinity" text="Conferma" style="-fx-background-color: #28A745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
+
+    <Button mnemonicParsing="false" onAction="#mostraGestisciDocumentiView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
+</VBox>

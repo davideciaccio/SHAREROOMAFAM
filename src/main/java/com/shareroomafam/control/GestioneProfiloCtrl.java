@@ -114,4 +114,9 @@ public class GestioneProfiloCtrl {
     void cliccaGestioneDatiPersonali(ActionEvent event) {
         Router.mostraGestioneDatiPersonaliView(event);
     }
+
+    @FXML
+    void cliccaGestisciDocumenti(ActionEvent event) {
+        Router.mostraGestisciDocumentiView(event);
+    }
 }

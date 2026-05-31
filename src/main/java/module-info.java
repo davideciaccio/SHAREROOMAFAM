@@ -3,6 +3,7 @@ module com.shareroomafam {
     requires javafx.fxml;
     requires java.sql;
     requires jakarta.mail;
+    requires java.desktop;
 
     opens com.shareroomafam to javafx.fxml;
     opens com.shareroomafam.boundary to javafx.fxml;
