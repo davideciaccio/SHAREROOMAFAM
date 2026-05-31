@@ -2,6 +2,7 @@ package com.shareroomafam.control;
 
 import com.shareroomafam.boundary.DBMSboundary;
 import com.shareroomafam.entity.Documento;
+import com.shareroomafam.textmessage.ConfirmText;
 import com.shareroomafam.textmessage.ErrorText;
 import com.shareroomafam.textmessage.SuccessfulText;
 import com.shareroomafam.utility.Router;
@@ -17,20 +18,26 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 import java.io.File;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GestisciDocumentiCtrl {
 
-    // ListView che ospiterà i documenti da impostare (in DocumentiAggiuntiChecklist)
+    // ListView per l'Eliminazione dei documenti (In EliminaDocumentiChecklist)
+    @FXML private ListView<HBox> documentiEliminaChecklistView;
+
+    // ListView per l'Aggiunta dei documenti (in DocumentiAggiuntiChecklist)
     @FXML private ListView<HBox> documentiChecklistView;
 
     // Lista statica per passare i file estratti dal FileSystem alla nuova finestra Checklist
     private static List<File> fileSelezionatiTemporanei = new ArrayList<>();
+    private static List<Documento> listaDocumenti = new ArrayList<>(); // Dal DBMS per l'eliminazione
 
     @FXML
     public void initialize() {
-        // Popoliamo la Checklist (Sequence passaggi 5 e 6: L'utente spunta/toglie la spunta)
+
+        // Popoliamo la Checklist per Carica Documenti (Sequence passaggi 5 e 6: L'utente spunta/toglie la spunta)
         if (documentiChecklistView != null && !fileSelezionatiTemporanei.isEmpty()) {
             documentiChecklistView.getItems().clear();
 
@@ -49,6 +56,25 @@ public class GestisciDocumentiCtrl {
 
                 row.getChildren().addAll(checkBox, lblTesto);
                 documentiChecklistView.getItems().add(row);
+            }
+        }
+
+        // --- Popolamento Checklist per Eliminazione Documenti ---
+        if (documentiEliminaChecklistView != null) {
+            documentiEliminaChecklistView.getItems().clear();
+
+            for (Documento doc : listaDocumenti) {
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                CheckBox checkBox = new CheckBox();
+                checkBox.setUserData(doc.getIdDocumento()); // Salviamo l'ID per eliminarlo
+
+                File f = new File(doc.getPercorso());
+                Label lblTesto = new Label(f.getName());
+
+                row.getChildren().addAll(checkBox, lblTesto);
+                documentiEliminaChecklistView.getItems().add(row);
             }
         }
     }
@@ -148,6 +174,111 @@ public class GestisciDocumentiCtrl {
 
 
     // ==========================================
+    // SEQUENCE: Gestione profilo – Gestisci documenti – Elimina documenti
+    // ==========================================
+
+    // 1. L'artista cliccaEliminaDocumenti in GestisciDocumentiView
+    @FXML
+    void cliccaEliminaDocumenti(ActionEvent event) {
+        // 2. GestisciDocumentiView crea GestisciDocumentiCtrl (JavaFX)
+
+        if (GestioneProfiloCtrl.artistaLoggato == null) {
+            new ErrorText("Errore di sessione. Effettua il login.").okay();
+            Router.mostraAuthView(event);
+            return;
+        }
+
+        ResultSet rs = null;
+        try {
+            // 3. GestisciDocumentiCtrl fa una getcodiceFiscaleArtista() sulla entity artista loggato
+            String cf = GestioneProfiloCtrl.artistaLoggato.getCodiceFiscale();
+
+            // 4. GestisciDocumentiCtrl fa una queryDBMSListaDocumenti(codiceFiscale)
+            rs = DBMSboundary.getInstance().queryDBMSListaDocumenti(cf);
+
+            listaDocumenti.clear();
+
+            if (rs != null) {
+                while (rs.next()) {
+                    int id = rs.getInt("idDocumento");
+                    boolean visibile = rs.getBoolean("visibile");
+                    String percorso = rs.getString("percorso");
+
+                    listaDocumenti.add(new Documento(id, cf, visibile, percorso));
+                }
+            }
+
+            if (listaDocumenti.isEmpty()) {
+                new ErrorText("Nessun documento caricato da eliminare.").okay();
+                return;
+            }
+
+            // 5. GestisciDocumentiCtrl crea EliminaDocumentiChecklist popolata da listaDocumenti.
+            Router.mostraEliminaDocumentiChecklist(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore nel recupero documenti.").okay();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) rs.getStatement().close();
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 7. L'artista cliccaElimina() su EliminaDocumentiChecklist.
+    @FXML
+    void cliccaElimina(ActionEvent event) {
+
+        List<Integer> idSelezionatiList = new ArrayList<>();
+
+        // 6. L'artista selezionaDocumentiDaEliminare() su EliminaDocumentiChecklist
+        for (HBox row : documentiEliminaChecklistView.getItems()) {
+            CheckBox cb = (CheckBox) row.getChildren().get(0);
+            if (cb.isSelected()) {
+                idSelezionatiList.add((Integer) cb.getUserData());
+            }
+        }
+
+        if (idSelezionatiList.isEmpty()) {
+            new ErrorText("Seleziona almeno un documento da eliminare.").okay();
+            return;
+        }
+
+        // 8. GestisciDocumentiCtrl crea ConfirmText, L'artista cliccaOkay()
+        ConfirmText confirm = new ConfirmText("Sei sicuro di voler eliminare i documenti selezionati?");
+        if (confirm.okay()) {
+
+            // Creiamo un Array per evitare conflitti (type erasure in Java) col metodo passaDati esistente
+            Integer[] idDaPassare = idSelezionatiList.toArray(new Integer[0]);
+
+            // 9. EliminaDocumentiChecklist fa la passaDati() alla GestisciDocumentiCtrl
+            passaDati(event, idDaPassare);
+        }
+    }
+
+    // Overload del metodo passaDati() per l'eliminazione
+    private void passaDati(ActionEvent event, Integer[] idsDaEliminare) {
+        try {
+            // 10. GestisciDocumentiCtrl fa una queryDBMSremoveDocument() alla DBMSboundary
+            for (int id : idsDaEliminare) {
+                DBMSboundary.getInstance().queryDBMSremoveDocument(id);
+            }
+
+            // 11. GestisciDocumentiCtrl fa la destroy documento della/delle entity documentio eliminate.
+            listaDocumenti.clear(); // Svuotiamo la memoria dalle entities
+
+            // 12. GestisciDocumentiCtrl invoca il metodo mostraGestisciDocumentiView
+            mostraGestisciDocumentiView(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore durante l'eliminazione dal database.").okay();
+        }
+    }
+
+
+    // ==========================================
     // METODI GLOBALI / STUB
     // ==========================================
 
@@ -161,8 +292,7 @@ public class GestisciDocumentiCtrl {
         Router.mostraGestioneProfiloView(event);
     }
 
-    // Stub pronti per i futuri Sequence Diagram del RAD
-    @FXML void cliccaEliminaDocumenti(ActionEvent event) {}
+    // Stub pronto per il Sequence Diagram "Cambia stato documenti"
     @FXML void cliccaCambiaStatoDocumenti(ActionEvent event) {}
 
     // ==========================================

@@ -123,4 +123,8 @@ public class Router {
     public static void mostraDocumentiAggiuntiChecklist(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/DocumentiAggiuntiChecklist.fxml", "ShareRoom AFAM - Checklist Documenti");
     }
+
+    public static void mostraEliminaDocumentiChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/EliminaDocumentiChecklist.fxml", "ShareRoom AFAM - Elimina Documenti");
+    }
 }

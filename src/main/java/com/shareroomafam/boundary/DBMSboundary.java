@@ -280,4 +280,18 @@ public class DBMSboundary {
         String sql = "SELECT * FROM DOCUMENTO WHERE codiceFiscale_artista = ? AND visibile = 1";
         return queryDBMS(sql, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE GESTISCI DOCUMENTI (Elimina Documenti) ---
+
+    public ResultSet queryDBMSListaDocumenti(String codiceFiscale) throws SQLException {
+        // Ritorna la lista di tutti i documenti associati all'artista
+        String sql = "SELECT * FROM DOCUMENTO WHERE codiceFiscale_artista = ?";
+        return queryDBMS(sql, codiceFiscale);
+    }
+
+    public int queryDBMSremoveDocument(int idDocumento) throws SQLException {
+        // Rimuove fisicamente il documento dal database
+        String sql = "DELETE FROM DOCUMENTO WHERE idDocumento = ?";
+        return insertDBMS(sql, idDocumento);
+    }
 }
