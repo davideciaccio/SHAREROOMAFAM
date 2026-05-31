@@ -87,4 +87,12 @@ public class Router {
     public static void mostraGestioneProfiloView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/GestioneProfiloView.fxml", "ShareRoom AFAM - Gestione Profilo");
     }
+
+    public static void mostraGestioneDatiPersonaliView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/GestioneDatiPersonaliView.fxml", "ShareRoom AFAM - Gestione Dati Personali");
+    }
+
+    public static void mostraModificaPasswordForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaPasswordForm.fxml", "ShareRoom AFAM - Cambia Password");
+    }
 }

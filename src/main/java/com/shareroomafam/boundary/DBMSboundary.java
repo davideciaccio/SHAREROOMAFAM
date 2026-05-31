@@ -199,4 +199,17 @@ public class DBMSboundary {
         String sql = "DELETE FROM ARTISTA WHERE codiceFiscale = ?";
         return insertDBMS(sql, codiceFiscale); // Usiamo insertDBMS perché gestisce l'esecuzione di query di modifica (INSERT/UPDATE/DELETE)
     }
+
+    // --- METODI PER SEQUENCE GESTIONE DATI PERSONALI (Cambia Password) ---
+
+    public ResultSet queryDBMSVerificaPassword(String codiceFiscale, String passwordDaVerificare) throws SQLException {
+        // Cerca l'artista solo se la password inserita coincide con quella attualmente salvata nel DB
+        String sql = "SELECT * FROM ARTISTA WHERE codiceFiscale = ? AND password = ?";
+        return queryDBMS(sql, codiceFiscale, passwordDaVerificare);
+    }
+
+    public int updateDBMSPassword(String codiceFiscale, String nuovaPassword) throws SQLException {
+        String sql = "UPDATE ARTISTA SET password = ? WHERE codiceFiscale = ?";
+        return insertDBMS(sql, nuovaPassword, codiceFiscale);
+    }
 }

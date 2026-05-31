@@ -109,4 +109,9 @@ public class GestioneProfiloCtrl {
     void tornaAllaHome(ActionEvent event) {
         Router.mostraHomePageArtistaView(event);
     }
+
+    @FXML
+    void cliccaGestioneDatiPersonali(ActionEvent event) {
+        Router.mostraGestioneDatiPersonaliView(event);
+    }
 }
