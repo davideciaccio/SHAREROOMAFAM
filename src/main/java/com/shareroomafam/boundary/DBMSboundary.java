@@ -226,4 +226,11 @@ public class DBMSboundary {
         String sql = "UPDATE ARTISTA SET nomeDarte = ? WHERE codiceFiscale = ?";
         return insertDBMS(sql, nuovoNomeArte, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE MODIFICA CARRIERA (Aggiungi Carriera) ---
+
+    public int insertDBMSCarriera(String codiceFiscale, String tipologia, int anni) throws SQLException {
+        String sql = "INSERT INTO CARRIERA (codiceFiscale_artista, tipologia, anni) VALUES (?, ?, ?)";
+        return insertDBMS(sql, codiceFiscale, tipologia, anni);
+    }
 }

@@ -209,5 +209,8 @@ public class GestioneDatiPersonaliCtrl {
 
     // Stub pronti per i futuri Sequence Diagram del RAD
     @FXML void cliccaModificaImmagine(ActionEvent event) {}
-    @FXML void cliccaModificaCarriera(ActionEvent event) {}
+    @FXML
+    void cliccaModificaCarriera(ActionEvent event) {
+        Router.mostraModificaCarrieraView(event);
+    }
 }

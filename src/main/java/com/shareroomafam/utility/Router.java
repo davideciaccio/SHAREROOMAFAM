@@ -99,4 +99,12 @@ public class Router {
     public static void mostraModificaNomeArteForm(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ModificaNomeArteForm.fxml", "ShareRoom AFAM - Modifica Nome d'Arte");
     }
+
+    public static void mostraModificaCarrieraView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaCarrieraView.fxml", "ShareRoom AFAM - Modifica Carriera");
+    }
+
+    public static void mostraInserisciDatiCarrieraForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/InserisciDatiCarrieraForm.fxml", "ShareRoom AFAM - Aggiungi Carriera");
+    }
 }
