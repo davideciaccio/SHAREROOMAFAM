@@ -127,4 +127,8 @@ public class Router {
     public static void mostraEliminaDocumentiChecklist(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/EliminaDocumentiChecklist.fxml", "ShareRoom AFAM - Elimina Documenti");
     }
+
+    public static void mostraDocumentiCaricatiChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/DocumentiCaricatiChecklist.fxml", "ShareRoom AFAM - Cambia Stato Documenti");
+    }
 }

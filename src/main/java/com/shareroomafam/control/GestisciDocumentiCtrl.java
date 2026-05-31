@@ -30,6 +30,9 @@ public class GestisciDocumentiCtrl {
     // ListView per l'Aggiunta dei documenti (in DocumentiAggiuntiChecklist)
     @FXML private ListView<HBox> documentiChecklistView;
 
+    // ListView per il Cambio Stato dei documenti (in DocumentiCaricatiChecklist)
+    @FXML private ListView<HBox> documentiStatoChecklistView;
+
     // Lista statica per passare i file estratti dal FileSystem alla nuova finestra Checklist
     private static List<File> fileSelezionatiTemporanei = new ArrayList<>();
     private static List<Documento> listaDocumenti = new ArrayList<>(); // Dal DBMS per l'eliminazione
@@ -75,6 +78,27 @@ public class GestisciDocumentiCtrl {
 
                 row.getChildren().addAll(checkBox, lblTesto);
                 documentiEliminaChecklistView.getItems().add(row);
+            }
+        }
+
+        // --- Popolamento Checklist per Cambia Stato Documenti ---
+        if (documentiStatoChecklistView != null) {
+            documentiStatoChecklistView.getItems().clear();
+
+            for (Documento doc : listaDocumenti) {
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
+
+                CheckBox checkBox = new CheckBox();
+                // NOTA: Già le spunte saranno presenti o assenti in base allo stato attuale del documento
+                checkBox.setSelected(doc.isVisibile());
+                checkBox.setUserData(doc.getIdDocumento()); // Salviamo l'ID del documento
+
+                File f = new File(doc.getPercorso());
+                Label lblTesto = new Label(f.getName());
+
+                row.getChildren().addAll(checkBox, lblTesto);
+                documentiStatoChecklistView.getItems().add(row);
             }
         }
     }
@@ -279,6 +303,108 @@ public class GestisciDocumentiCtrl {
 
 
     // ==========================================
+    // SEQUENCE: Gestione profilo – Gestisci documenti – Cambia stato documenti
+    // ==========================================
+
+    // 1. L'artista cliccaCambiaStatoDocumenti() in GestisciDocumentiView
+    @FXML
+    void cliccaCambiaStatoDocumenti(ActionEvent event) {
+        // 2. GestisciDocumentiView crea GestisciDocumentiCtrl (Automatico in JavaFX)
+
+        if (GestioneProfiloCtrl.artistaLoggato == null) {
+            new ErrorText("Errore di sessione. Effettua il login.").okay();
+            Router.mostraAuthView(event);
+            return;
+        }
+
+        ResultSet rs = null;
+        try {
+            // 3. GestisciDocumentiCtrl fa la getCodiceFiscaleArtista() dalla entity
+            String cf = GestioneProfiloCtrl.artistaLoggato.getCodiceFiscale();
+
+            // 4. GestisciDocumentiCtrl fa una queryDBMSListaDocumenti() alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSListaDocumenti(cf);
+
+            listaDocumenti.clear();
+
+            if (rs != null) {
+                while (rs.next()) {
+                    int id = rs.getInt("idDocumento");
+                    boolean visibile = rs.getBoolean("visibile");
+                    String percorso = rs.getString("percorso");
+                    listaDocumenti.add(new Documento(id, cf, visibile, percorso));
+                }
+            }
+
+            if (listaDocumenti.isEmpty()) {
+                new ErrorText("Nessun documento caricato nel sistema.").okay();
+                return;
+            }
+
+            // 5. GestisciDocumentiCtrl crea una DocumentiCaricatiChecklist popolata da listaDocumenti
+            Router.mostraDocumentiCaricatiChecklist(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore nel recupero documenti.").okay();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) rs.getStatement().close();
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 8. L'artista clicca SalvaModifiche() dentro DocumentiCaricatiChecklist
+    @FXML
+    void cliccaSalvaModifiche(ActionEvent event) {
+
+        // 6 e 7. L'artista selezionaDocumenti() e deselezionaDocumenti() in DocumentiCaricatiChecklist
+        List<DocumentoUpdateStato> updateList = new ArrayList<>();
+
+        for (HBox row : documentiStatoChecklistView.getItems()) {
+            CheckBox cb = (CheckBox) row.getChildren().get(0);
+            int idDoc = (Integer) cb.getUserData();
+            boolean visibile = cb.isSelected();
+
+            updateList.add(new DocumentoUpdateStato(idDoc, visibile));
+        }
+
+        // 9. DocumentiCaricatiChecklist fa la passaDati() alla GestisciProfiloCtrl (In questo caso passiamo array per l'overload)
+        DocumentoUpdateStato[] datiDaPassare = updateList.toArray(new DocumentoUpdateStato[0]);
+        passaDati(event, datiDaPassare);
+    }
+
+    // Overload del metodo passaDati() per l'aggiornamento dello stato
+    private void passaDati(ActionEvent event, DocumentoUpdateStato[] datiDaPassare) {
+        try {
+            for (DocumentoUpdateStato docStato : datiDaPassare) {
+                // 10. GestisciProfiliCtrl fa una queryDBMSUpdateStatoDocumenti() alla DBMSBoundary
+                DBMSboundary.getInstance().queryDBMSUpdateStatoDocumenti(docStato.idDocumento, docStato.visibile);
+
+                // 11. GestisciDocumentiCtrl fa una SetDatiStatoDocumento() alla/alle entity documenti modificate
+                for(Documento docEntity : listaDocumenti) {
+                    if (docEntity.getIdDocumento() == docStato.idDocumento) {
+                        docEntity.setVisibile(docStato.visibile);
+                        break;
+                    }
+                }
+            }
+
+            // 12. GestisciDocumentiCtrl crea SuccessfulText, L'artista cliccaOkay()
+            SuccessfulText successText = new SuccessfulText("Modifica eseguita correttamente");
+            successText.okay();
+
+            // 13. GestisciDocumentiCtrl invoca il metodo mostraGestisciDocumentiView().
+            mostraGestisciDocumentiView(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore durante l'aggiornamento.").okay();
+        }
+    }
+
+
+    // ==========================================
     // METODI GLOBALI / STUB
     // ==========================================
 
@@ -292,18 +418,27 @@ public class GestisciDocumentiCtrl {
         Router.mostraGestioneProfiloView(event);
     }
 
-    // Stub pronto per il Sequence Diagram "Cambia stato documenti"
-    @FXML void cliccaCambiaStatoDocumenti(ActionEvent event) {}
+    // ==========================================
+    // CLASSI DI SUPPORTO INTERNE
+    // ==========================================
 
-    // ==========================================
-    // CLASSE DI SUPPORTO INTERNA
-    // ==========================================
+    // Per aggiungere documenti nuovi
     private static class DocumentoSetup {
         boolean visibile;
         String percorso;
         DocumentoSetup(boolean visibile, String percorso) {
             this.visibile = visibile;
             this.percorso = percorso;
+        }
+    }
+
+    // Per aggiornare stato documenti esistenti
+    private static class DocumentoUpdateStato {
+        int idDocumento;
+        boolean visibile;
+        DocumentoUpdateStato(int idDocumento, boolean visibile) {
+            this.idDocumento = idDocumento;
+            this.visibile = visibile;
         }
     }
 }

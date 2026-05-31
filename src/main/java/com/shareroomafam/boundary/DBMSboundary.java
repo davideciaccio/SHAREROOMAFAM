@@ -294,4 +294,12 @@ public class DBMSboundary {
         String sql = "DELETE FROM DOCUMENTO WHERE idDocumento = ?";
         return insertDBMS(sql, idDocumento);
     }
+
+    // --- METODI PER SEQUENCE GESTISCI DOCUMENTI (Cambia stato documenti) ---
+
+    public int queryDBMSUpdateStatoDocumenti(int idDocumento, boolean visibile) throws SQLException {
+        // Aggiorna lo stato "visibile" (1 o 0) del documento nel DB
+        String sql = "UPDATE DOCUMENTO SET visibile = ? WHERE idDocumento = ?";
+        return insertDBMS(sql, visibile, idDocumento);
+    }
 }
