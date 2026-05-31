@@ -233,4 +233,18 @@ public class DBMSboundary {
         String sql = "INSERT INTO CARRIERA (codiceFiscale_artista, tipologia, anni) VALUES (?, ?, ?)";
         return insertDBMS(sql, codiceFiscale, tipologia, anni);
     }
+
+    // --- METODI PER SEQUENCE MODIFICA CARRIERA (Rimuovi Carriera) ---
+
+    public ResultSet queryDBMSListaCarriere(String codiceFiscale) throws SQLException {
+        // Estrae tutte le carriere dell'artista loggato
+        String sql = "SELECT * FROM CARRIERA WHERE codiceFiscale_artista = ?";
+        return queryDBMS(sql, codiceFiscale);
+    }
+
+    public int removeDBMSCarriereSelezionate(int idCarriera) throws SQLException {
+        // Elimina la carriera specifica in base all'ID univoco
+        String sql = "DELETE FROM CARRIERA WHERE idCarriera = ?";
+        return insertDBMS(sql, idCarriera);
+    }
 }

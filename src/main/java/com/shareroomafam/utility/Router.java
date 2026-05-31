@@ -107,4 +107,8 @@ public class Router {
     public static void mostraInserisciDatiCarrieraForm(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/InserisciDatiCarrieraForm.fxml", "ShareRoom AFAM - Aggiungi Carriera");
     }
+
+    public static void mostraListaCarriereView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ListaCarriereView.fxml", "ShareRoom AFAM - Rimuovi Carriere");
+    }
 }
