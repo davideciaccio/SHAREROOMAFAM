@@ -24,7 +24,7 @@ CREATE TABLE CARRIERA (
                           FOREIGN KEY (codiceFiscale_artista) REFERENCES ARTISTA(codiceFiscale) ON DELETE CASCADE
 );
 
--- Tabella UTENTE
+-- Tabella UTENTE (per il caso d'uso dell'App "Visualizza Profili")
 CREATE TABLE UTENTE (
                         idUtente INT NOT NULL PRIMARY KEY
 );
@@ -57,12 +57,20 @@ CREATE TABLE CONTIENE (
                           FOREIGN KEY (idDocumento) REFERENCES DOCUMENTO(idDocumento) ON DELETE CASCADE
 );
 
--- Tabella VISUALIZZAZIONE (Necessaria per la tracciabilità delle visite sulle stanze)
+-- Tabella VISUALIZZATORE (Per l'ospite esterno che accede dal Web Server)
+CREATE TABLE VISUALIZZATORE (
+                                idVisualizzatore INT AUTO_INCREMENT PRIMARY KEY,
+                                nomeVisualizzatore VARCHAR(50) NOT NULL,
+                                cognomeVisualizzatore VARCHAR(50) NOT NULL,
+                                emailVisualizzatore VARCHAR(100) NOT NULL
+);
+
+-- Tabella VISUALIZZAZIONE (Collega la Stanza al Visualizzatore Web per il Monitoraggio)
 CREATE TABLE VISUALIZZAZIONE (
                                  idVisualizzazione INT AUTO_INCREMENT PRIMARY KEY,
                                  idStanza INT NOT NULL,
-                                 idUtente INT,
+                                 idVisualizzatore INT NOT NULL,
                                  dataVisualizzazione DATETIME DEFAULT CURRENT_TIMESTAMP,
                                  FOREIGN KEY (idStanza) REFERENCES STANZA(idStanza) ON DELETE CASCADE,
-                                 FOREIGN KEY (idUtente) REFERENCES UTENTE(idUtente) ON DELETE SET NULL
+                                 FOREIGN KEY (idVisualizzatore) REFERENCES VISUALIZZATORE(idVisualizzatore) ON DELETE CASCADE
 );
