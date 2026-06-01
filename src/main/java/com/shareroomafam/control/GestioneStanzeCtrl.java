@@ -320,9 +320,11 @@ public class GestioneStanzeCtrl {
         }
     }
 
+
     // 11.9 Metodo generatore di link
     private String generaLinkStanza() {
-        return "shareroom.com/s/" + UUID.randomUUID().toString().substring(0, 8);
+        // Sostituito "shareroom.com/s/" con il link diretto di localhost per test immediati
+        return "http://localhost:8080/s/" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     // Esegue 11.13 e 11.14
@@ -408,11 +410,14 @@ public class GestioneStanzeCtrl {
 
             if (rs != null) {
                 while (rs.next()) {
-                    int idUtente = rs.getInt("IdUtente");
+                    // Leggiamo i nuovi campi estratti dalla JOIN
+                    String nome = rs.getString("nomeVisualizzatore");
+                    String cognome = rs.getString("cognomeVisualizzatore");
+                    String email = rs.getString("emailVisualizzatore");
                     String dataVis = rs.getString("dataVisualizzazione");
 
-                    // Salviamo i dati grezzi come richiesto
-                    listaVisualizzatoriTemporanea.add("👤 ID Utente: " + idUtente + " - 📅 Data: " + dataVis);
+                    // Creiamo una stringa di monitoraggio elegante e completa
+                    listaVisualizzatoriTemporanea.add("👤 " + nome + " " + cognome + " (" + email + ") - 📅 " + dataVis);
                 }
             }
 

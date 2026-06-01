@@ -339,8 +339,12 @@ public class DBMSboundary {
     // --- METODI PER SEQUENCE GESTIONE STANZE (Monitoraggio Stanza) ---
 
     public ResultSet queryDBMSListaVisualizzatori(int idStanza) throws SQLException {
-        // Estrae tutti i record di visualizzazione per la stanza specifica
-        String sql = "SELECT * FROM VISUALIZZAZIONE WHERE idStanza = ?";
+        // Estrae i dati della visualizzazione uniti ai dati anagrafici del visualizzatore
+        String sql = "SELECT V.dataVisualizzazione, U.nomeVisualizzatore, U.cognomeVisualizzatore, U.emailVisualizzatore " +
+                "FROM VISUALIZZAZIONE V " +
+                "JOIN VISUALIZZATORE U ON V.idVisualizzatore = U.idVisualizzatore " +
+                "WHERE V.idStanza = ? " +
+                "ORDER BY V.dataVisualizzazione DESC";
         return queryDBMS(sql, idStanza);
     }
 
@@ -396,5 +400,45 @@ public class DBMSboundary {
         // Aggiorna lo stato "scaricabile" del documento all'interno della specifica stanza
         String sql = "UPDATE CONTIENE SET scaricabile = ? WHERE idStanza = ? AND idDocumento = ?";
         return insertDBMS(sql, scaricabile, idStanza, idDocumento);
+    }
+
+    // --- METODI PER IL WEB SERVER LOCALE ---
+
+    public ResultSet queryDBMSStanzaByLinkIdentifier(String urlCode) throws SQLException {
+        String fullLink = "http://localhost:8080/s/" + urlCode;
+        String sql = "SELECT * FROM STANZA WHERE link = ?";
+        return queryDBMS(sql, fullLink);
+    }
+
+    public ResultSet queryDBMSDocumentoById(int idDocumento) throws SQLException {
+        String sql = "SELECT * FROM DOCUMENTO WHERE idDocumento = ?";
+        return queryDBMS(sql, idDocumento);
+    }
+
+    // NUOVO: Salva il visitatore e restituisce l'ID generato automaticamente!
+    public int insertDBMSVisualizzatore(String nome, String cognome, String email) throws SQLException {
+        String sql = "INSERT INTO VISUALIZZATORE (nomeVisualizzatore, cognomeVisualizzatore, emailVisualizzatore) VALUES (?, ?, ?)";
+
+        // Scriviamo il PreparedStatement a mano per assicurarci di recuperare l'ID (RETURN_GENERATED_KEYS)
+        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, nome);
+            pstmt.setString(2, cognome);
+            pstmt.setString(3, email);
+            pstmt.executeUpdate();
+
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // Ritorna l'ID autoincrementato!
+                } else {
+                    throw new SQLException("Creazione visualizzatore fallita, nessun ID ottenuto.");
+                }
+            }
+        }
+    }
+
+    // MODIFICATO: Usa l'idVisualizzatore invece dell'IdUtente
+    public void insertDBMSVisualizzazione(int idStanza, int idVisualizzatore) throws SQLException {
+        String sql = "INSERT INTO VISUALIZZAZIONE (idStanza, idVisualizzatore, dataVisualizzazione) VALUES (?, ?, CURRENT_TIMESTAMP)";
+        insertDBMS(sql, idStanza, idVisualizzatore);
     }
 }

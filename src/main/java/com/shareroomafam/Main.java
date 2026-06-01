@@ -1,5 +1,6 @@
 package com.shareroomafam;
 
+import com.shareroomafam.server.WebServerManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,6 +13,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        // ---> NOVITÀ: Avvio del Web Server Locale in background <---
+        WebServerManager.startServer();
+
         // 1. Definiamo il percorso del file FXML
         // NOTA: Il percorso inizia con "/" che indica la radice della cartella resources
         URL fxmlLocation = getClass().getResource("/com/shareroomafam/view/AuthView.fxml");
@@ -33,6 +38,13 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.setResizable(false); // Blocchiamo il ridimensionamento per mantenere il layout pulito
         primaryStage.show();
+    }
+
+    // ---> NOVITÀ: Spegnimento pulito del Server alla chiusura dell'app <---
+    @Override
+    public void stop() throws Exception {
+        WebServerManager.stopServer();
+        super.stop(); // Richiama la chiusura standard di JavaFX
     }
 
     public static void main(String[] args) {
