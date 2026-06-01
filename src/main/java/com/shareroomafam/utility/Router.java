@@ -148,4 +148,8 @@ public class Router {
     public static void mostraFinestraCopiaLinkView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/FinestraCopiaLinkView.fxml", "ShareRoom AFAM - Condividi Stanza");
     }
+
+    public static void mostraListaVisualizzatoriView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ListaVisualizzatoriView.fxml", "ShareRoom AFAM - Lista Visualizzatori");
+    }
 }

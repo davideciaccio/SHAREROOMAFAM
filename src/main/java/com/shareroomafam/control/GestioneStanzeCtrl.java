@@ -34,15 +34,15 @@ public class GestioneStanzeCtrl {
     @FXML private ListView<HBox> documentiChecklistView; // In DocumentiChecklist
     @FXML private ListView<HBox> documentiScaricabiliListView; // In DocumentiScaricabiliChecklist
     @FXML private Label linkStanzaLabel; // In FinestraCopiaLinkView
-
+    @FXML private ListView<String> visualizzatoriListView; // In ListaVisualizzatoriView
 
     // --- VARIABILI DI STATO TEMPORANEE (Sessione di creazione stanza) ---
     private static String nomeStanzaTemporaneo;
     private static List<Documento> listaDocumentiTotali = new ArrayList<>();
     private static List<Documento> listaDocumentiSelezionati = new ArrayList<>();
-    // --- VARIABILI DI STATO TEMPORANEE (Sessione di condivisione) ---
+    // --- VARIABILI DI STATO TEMPORANEE (Sessione di condivisione e monitoraggio) ---
     private static String linkDaCopiare;
-
+    private static List<String> listaVisualizzatoriTemporanea = new ArrayList<>();
 
     // Lista delle stanze attualmente caricate (per aggiornare la view)
     private static List<Stanza> listaStanzeAggiornata = new ArrayList<>();
@@ -77,7 +77,7 @@ public class GestioneStanzeCtrl {
                     } catch (Exception ignore) {}
                 }
             }
-
+            // Popoliamo l'interfaccia grafica
             for (Stanza s : listaStanzeAggiornata) {
                 HBox row = new HBox(15);
                 row.setAlignment(Pos.CENTER_LEFT);
@@ -91,8 +91,12 @@ public class GestioneStanzeCtrl {
                 btnCondividi.setUserData(s.getIdStanza()); // Salviamo l'ID stanza nel bottone
                 btnCondividi.setOnAction(this::cliccaCondividiStanza); // Colleghiamo l'azione
 
-                // Bottoni del RAD (attualmente Stub)
+                // Configurazione Bottone Monitoraggio
                 Button btnMonitora = new Button("Monitoraggio");
+                btnMonitora.setUserData(s.getIdStanza()); // Salviamo l'ID stanza nel bottone
+                btnMonitora.setOnAction(this::cliccaMonitoraggio); // Colleghiamo l'azione
+
+                // Altri bottoni del RAD
                 Button btnModifica = new Button("Modifica");
                 Button btnElimina = new Button("Elimina");
                 btnElimina.setStyle("-fx-text-fill: red;");
@@ -135,6 +139,16 @@ public class GestioneStanzeCtrl {
         // Popola la FinestraCopiaLinkView
         if (linkStanzaLabel != null && linkDaCopiare != null) {
             linkStanzaLabel.setText(linkDaCopiare);
+        }
+
+        // Popola la ListaVisualizzatoriView
+        if (visualizzatoriListView != null) {
+            visualizzatoriListView.getItems().clear();
+            if (listaVisualizzatoriTemporanea.isEmpty()) {
+                visualizzatoriListView.getItems().add("Nessuna visualizzazione registrata per questa stanza.");
+            } else {
+                visualizzatoriListView.getItems().addAll(listaVisualizzatoriTemporanea);
+            }
         }
     }
 
@@ -361,6 +375,58 @@ public class GestioneStanzeCtrl {
         success.okay();
 
         // 8. GestioneStanzeCtrl invoca il metodo mostraGestioneStanzeView.
+        mostraGestioneStanzeView(event);
+    }
+
+
+    // ==========================================
+    // SEQUENCE: Gestione stanze – Monitoraggio condivisione stanza
+    // ==========================================
+
+    // 1. L'artista cliccaMonitoraggio() su GestioneStanzeView
+    @FXML
+    void cliccaMonitoraggio(ActionEvent event) {
+        Button btnPremuto = (Button) event.getSource();
+
+        // 3. GestioneStanzeCtrl recupera l'id della stanza
+        int idStanza = (Integer) btnPremuto.getUserData();
+
+        ResultSet rs = null;
+        try {
+            // 4. GestioneStanzeCtrl fa una queryDBMSListaVisualizzatori alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSListaVisualizzatori(idStanza);
+
+            listaVisualizzatoriTemporanea.clear();
+
+            if (rs != null) {
+                while (rs.next()) {
+                    int idUtente = rs.getInt("IdUtente");
+                    String dataVis = rs.getString("dataVisualizzazione");
+
+                    // Salviamo i dati grezzi come richiesto
+                    listaVisualizzatoriTemporanea.add("👤 ID Utente: " + idUtente + " - 📅 Data: " + dataVis);
+                }
+            }
+
+            // 5. GestioneStanzeCtrl crea ListaVisualizzatoriView
+            Router.mostraListaVisualizzatoriView(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore durante il recupero dei visualizzatori.").okay();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) rs.getStatement().close();
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 6. L'artista cliccaChiudi() dentro listaVisualizzatoriView.
+    @FXML
+    void cliccaChiudi(ActionEvent event) {
+        listaVisualizzatoriTemporanea.clear();
+
+        // 7. GestioneStanzeCtrl invoca il metodo mostraGestioneStanzeView().
         mostraGestioneStanzeView(event);
     }
 

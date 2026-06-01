@@ -335,4 +335,12 @@ public class DBMSboundary {
         String sql = "SELECT link FROM STANZA WHERE idStanza = ?";
         return queryDBMS(sql, idStanza);
     }
+
+    // --- METODI PER SEQUENCE GESTIONE STANZE (Monitoraggio Stanza) ---
+
+    public ResultSet queryDBMSListaVisualizzatori(int idStanza) throws SQLException {
+        // Estrae tutti i record di visualizzazione per la stanza specifica
+        String sql = "SELECT * FROM VISUALIZZAZIONE WHERE idStanza = ?";
+        return queryDBMS(sql, idStanza);
+    }
 }
