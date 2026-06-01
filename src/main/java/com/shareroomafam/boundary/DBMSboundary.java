@@ -355,4 +355,12 @@ public class DBMSboundary {
         String selectSql = "SELECT * FROM STANZA WHERE codiceFiscale_artista = ?";
         return queryDBMS(selectSql, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE MODIFICA STANZA ---
+
+    public int updateDBMSNomeStanza(int idStanza, String nuovoNome) throws SQLException {
+        // Aggiorna il nome della stanza specificata
+        String sql = "UPDATE STANZA SET nomeStanza = ? WHERE idStanza = ?";
+        return insertDBMS(sql, nuovoNome, idStanza);
+    }
 }

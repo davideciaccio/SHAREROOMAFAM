@@ -152,4 +152,12 @@ public class Router {
     public static void mostraListaVisualizzatoriView(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ListaVisualizzatoriView.fxml", "ShareRoom AFAM - Lista Visualizzatori");
     }
+
+    public static void mostraModificaStanzaView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaStanzaView.fxml", "ShareRoom AFAM - Modifica Stanza");
+    }
+
+    public static void mostraModificaNomeForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaNomeForm.fxml", "ShareRoom AFAM - Modifica Nome Stanza");
+    }
 }

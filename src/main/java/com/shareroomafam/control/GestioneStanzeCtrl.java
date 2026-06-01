@@ -97,8 +97,10 @@ public class GestioneStanzeCtrl {
                 btnMonitora.setUserData(s.getIdStanza()); // Salviamo l'ID stanza nel bottone
                 btnMonitora.setOnAction(this::cliccaMonitoraggio); // Colleghiamo l'azione
 
-                // Altri bottoni del RAD
+                // Configurazione Bottone Modifica
                 Button btnModifica = new Button("Modifica");
+                btnModifica.setUserData(s); // PASSAGGIO CHIAVE: Salviamo l'intero oggetto Stanza nel bottone!
+                btnModifica.setOnAction(this::cliccaModificaStanza); // Colleghiamo l'azione
 
                 // Configurazione Bottone Elimina Stanza
                 Button btnElimina = new Button("Elimina");
@@ -506,6 +508,17 @@ public class GestioneStanzeCtrl {
     @FXML
     void tornaAllaHome(ActionEvent event) {
         Router.mostraHomePageArtistaView(event);
+    }
+
+    @FXML
+    void cliccaModificaStanza(ActionEvent event) {
+        Button btnPremuto = (Button) event.getSource();
+        Stanza stanzaSelezionata = (Stanza) btnPremuto.getUserData();
+
+        // Passiamo la stanza selezionata alla nuova Control prima di cambiare vista
+        ModificaStanzaCtrl.stanzaInModifica = stanzaSelezionata;
+
+        Router.mostraModificaStanzaView(event);
     }
 
     // Support class per il passaggio di parametri misti id/boolean
