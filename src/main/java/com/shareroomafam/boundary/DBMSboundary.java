@@ -343,4 +343,16 @@ public class DBMSboundary {
         String sql = "SELECT * FROM VISUALIZZAZIONE WHERE idStanza = ?";
         return queryDBMS(sql, idStanza);
     }
+
+    // --- METODI PER SEQUENCE GESTIONE STANZE (Elimina Stanza) ---
+
+    public ResultSet updateDBMSStanza(int idStanza, String codiceFiscale) throws SQLException {
+        // 1. Elimina la stanza
+        String deleteSql = "DELETE FROM STANZA WHERE idStanza = ?";
+        insertDBMS(deleteSql, idStanza);
+
+        // 2. Ritorna la lista delle stanze aggiornata
+        String selectSql = "SELECT * FROM STANZA WHERE codiceFiscale_artista = ?";
+        return queryDBMS(selectSql, codiceFiscale);
+    }
 }

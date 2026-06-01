@@ -3,6 +3,7 @@ package com.shareroomafam.control;
 import com.shareroomafam.boundary.DBMSboundary;
 import com.shareroomafam.entity.Documento;
 import com.shareroomafam.entity.Stanza;
+import com.shareroomafam.textmessage.ConfirmText;
 import com.shareroomafam.textmessage.ErrorText;
 import com.shareroomafam.textmessage.SuccessfulText;
 import com.shareroomafam.utility.Router;
@@ -98,7 +99,12 @@ public class GestioneStanzeCtrl {
 
                 // Altri bottoni del RAD
                 Button btnModifica = new Button("Modifica");
+
+                // Configurazione Bottone Elimina Stanza
                 Button btnElimina = new Button("Elimina");
+                btnElimina.setStyle("-fx-text-fill: red;");
+                btnElimina.setUserData(s.getIdStanza()); // Salviamo l'ID stanza per l'eliminazione
+                btnElimina.setOnAction(this::cliccaEliminaStanza); // Colleghiamo l'azione
                 btnElimina.setStyle("-fx-text-fill: red;");
 
                 row.getChildren().addAll(lblTesto, spacer, btnCondividi, btnMonitora, btnModifica, btnElimina);
@@ -428,6 +434,63 @@ public class GestioneStanzeCtrl {
 
         // 7. GestioneStanzeCtrl invoca il metodo mostraGestioneStanzeView().
         mostraGestioneStanzeView(event);
+    }
+
+
+    // ==========================================
+    // SEQUENCE: Gestione stanze – Elimina stanza
+    // ==========================================
+
+    // 1. L'artista cliccaEliminaStanza() dentro GestioneStanzeView
+    @FXML
+    void cliccaEliminaStanza(ActionEvent event) {
+        // 2. GestioneStanzeView crea GestioneStanzeCtrl (Automatico in JavaFX)
+        Button btnPremuto = (Button) event.getSource();
+
+        // 3. GestioneStanzeCtrl recupera idStanza della stanza che si vuole eliminare
+        int idStanza = (Integer) btnPremuto.getUserData();
+
+        // 4. GestioneStanzeCtrl crea ConfirmText
+        ConfirmText confirmText = new ConfirmText("Eliminare stanza?");
+
+        // 5. L'artista cliccaSi()
+        if (confirmText.si()) {
+            ResultSet rs = null;
+            try {
+                String cf = GestioneProfiloCtrl.artistaLoggato.getCodiceFiscale();
+
+                // 6. GestioneStanzeCtrl fa una query updateDBMSStanza() alla DBMSboundary...
+                // elimina la stanza e ritorna la lista delle stanze aggiornata
+                rs = DBMSboundary.getInstance().updateDBMSStanza(idStanza, cf);
+
+                listaStanzeAggiornata.clear();
+                if (rs != null) {
+                    while (rs.next()) {
+                        int id = rs.getInt("idStanza");
+                        String nome = rs.getString("nomeStanza");
+                        String link = rs.getString("link");
+                        listaStanzeAggiornata.add(new Stanza(id, cf, nome, link));
+                    }
+                }
+
+                // 7. GestioneStanzeCtrl crea SuccessfulText
+                SuccessfulText success = new SuccessfulText("Stanza eliminata");
+
+                // 8. L'artista cliccaOkay()
+                success.okay();
+
+                // 9. GestioneStanzeCtrl invoca il metodo mostraGestioneStanzeView() popolato dalla nuova lista
+                mostraGestioneStanzeView(event);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                new ErrorText("Errore durante l'eliminazione della stanza.").okay();
+            } finally {
+                try {
+                    if (rs != null && !rs.isClosed()) rs.getStatement().close();
+                } catch (Exception ignore) {}
+            }
+        }
     }
 
 
