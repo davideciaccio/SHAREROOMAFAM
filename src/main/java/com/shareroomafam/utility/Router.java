@@ -160,4 +160,12 @@ public class Router {
     public static void mostraModificaNomeForm(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ModificaNomeForm.fxml", "ShareRoom AFAM - Modifica Nome Stanza");
     }
+
+    public static void mostraDocumentiDaInserireChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/DocumentiDaInserireChecklist.fxml", "ShareRoom AFAM - Aggiungi Documenti alla Stanza");
+    }
+
+    public static void mostraModificaDocumentiScaricabiliChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/ModificaDocumentiScaricabiliChecklist.fxml", "ShareRoom AFAM - Permessi Download Nuovi Documenti");
+    }
 }

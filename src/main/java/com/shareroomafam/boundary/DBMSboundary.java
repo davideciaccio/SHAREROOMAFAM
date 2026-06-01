@@ -363,4 +363,18 @@ public class DBMSboundary {
         String sql = "UPDATE STANZA SET nomeStanza = ? WHERE idStanza = ?";
         return insertDBMS(sql, nuovoNome, idStanza);
     }
+
+    // --- METODI PER SEQUENCE MODIFICA STANZA (Aggiungi Documenti) ---
+
+    public ResultSet queryDocumentiNonInStanza(String codiceFiscale, int idStanza) throws SQLException {
+        // Estrae tutti i documenti dell'artista che NON sono ancora collegati alla stanza in CONTIENE
+        String sql = "SELECT * FROM DOCUMENTO WHERE codiceFiscale_artista = ? AND idDocumento NOT IN (SELECT idDocumento FROM CONTIENE WHERE idStanza = ?)";
+        return queryDBMS(sql, codiceFiscale, idStanza);
+    }
+
+    public void insertDocumentiStanzaDBMS(int idStanza, int idDocumento, boolean scaricabile) throws SQLException {
+        // Inserisce i nuovi documenti selezionati nella tabella CONTIENE
+        String sql = "INSERT INTO CONTIENE (idStanza, idDocumento, scaricabile) VALUES (?, ?, ?)";
+        insertDBMS(sql, idStanza, idDocumento, scaricabile);
+    }
 }
