@@ -17,6 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 import java.io.File;
 import java.sql.ResultSet;
@@ -31,11 +33,16 @@ public class GestioneStanzeCtrl {
     @FXML private TextField nomeStanzaField;     // In InserisciNomeStanzaForm
     @FXML private ListView<HBox> documentiChecklistView; // In DocumentiChecklist
     @FXML private ListView<HBox> documentiScaricabiliListView; // In DocumentiScaricabiliChecklist
+    @FXML private Label linkStanzaLabel; // In FinestraCopiaLinkView
+
 
     // --- VARIABILI DI STATO TEMPORANEE (Sessione di creazione stanza) ---
     private static String nomeStanzaTemporaneo;
     private static List<Documento> listaDocumentiTotali = new ArrayList<>();
     private static List<Documento> listaDocumentiSelezionati = new ArrayList<>();
+    // --- VARIABILI DI STATO TEMPORANEE (Sessione di condivisione) ---
+    private static String linkDaCopiare;
+
 
     // Lista delle stanze attualmente caricate (per aggiornare la view)
     private static List<Stanza> listaStanzeAggiornata = new ArrayList<>();
@@ -45,6 +52,32 @@ public class GestioneStanzeCtrl {
         // Popola la GestioneStanzeView
         if (stanzeListView != null) {
             stanzeListView.getItems().clear();
+
+            // INTERROGHIAMO PER RECUPERARE LE STANZE AL CARICAMENTO DELLA PAGINA <---
+            if (GestioneProfiloCtrl.artistaLoggato != null) {
+                ResultSet rs = null;
+                try {
+                    String cf = GestioneProfiloCtrl.artistaLoggato.getCodiceFiscale();
+                    rs = DBMSboundary.getInstance().queryDBMSListaStanze(cf);
+                    listaStanzeAggiornata.clear();
+
+                    if (rs != null) {
+                        while(rs.next()) {
+                            int id = rs.getInt("idStanza");
+                            String nome = rs.getString("nomeStanza");
+                            String link = rs.getString("link");
+                            listaStanzeAggiornata.add(new Stanza(id, cf, nome, link));
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (rs != null && !rs.isClosed()) rs.getStatement().close();
+                    } catch (Exception ignore) {}
+                }
+            }
+
             for (Stanza s : listaStanzeAggiornata) {
                 HBox row = new HBox(15);
                 row.setAlignment(Pos.CENTER_LEFT);
@@ -53,8 +86,12 @@ public class GestioneStanzeCtrl {
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                // Bottoni del RAD (attualmente Stub)
+                // Configurazione Bottone Condividi
                 Button btnCondividi = new Button("Condividi");
+                btnCondividi.setUserData(s.getIdStanza()); // Salviamo l'ID stanza nel bottone
+                btnCondividi.setOnAction(this::cliccaCondividiStanza); // Colleghiamo l'azione
+
+                // Bottoni del RAD (attualmente Stub)
                 Button btnMonitora = new Button("Monitoraggio");
                 Button btnModifica = new Button("Modifica");
                 Button btnElimina = new Button("Elimina");
@@ -93,6 +130,11 @@ public class GestioneStanzeCtrl {
                 row.getChildren().addAll(cb, lbl);
                 documentiScaricabiliListView.getItems().add(row);
             }
+        }
+
+        // Popola la FinestraCopiaLinkView
+        if (linkStanzaLabel != null && linkDaCopiare != null) {
+            linkStanzaLabel.setText(linkDaCopiare);
         }
     }
 
@@ -263,17 +305,37 @@ public class GestioneStanzeCtrl {
 
     // Esegue 11.13 e 11.14
     private void aggiornaEmostraVista(ActionEvent event, String cf) {
+        // La query al DB è stata spostata nell'initialize() per garantire che venga
+        // eseguita ogni volta che si entra nella GestioneStanzeView
+        Router.mostraGestioneStanzeView(event);
+    }
+
+
+    // ==========================================
+    // SEQUENCE: Gestione stanze – Condividi stanza
+    // ==========================================
+
+    // 1. L'artista cliccaCondividiStanza() dentro GestioneStanzeView
+    @FXML
+    void cliccaCondividiStanza(ActionEvent event) {
+        // Estraiamo il bottone che ha generato l'evento
+        Button btnPremuto = (Button) event.getSource();
+
+        // 3. GestioneStanzeCtrl recupera l'iDStanza con un metodo getIdSstanza()
+        int idStanza = (Integer) btnPremuto.getUserData();
+
         ResultSet rs = null;
         try {
-            rs = DBMSboundary.getInstance().queryDBMSListaStanze(cf);
-            listaStanzeAggiornata.clear();
-            if (rs != null) {
-                while(rs.next()) {
-                    int id = rs.getInt("idStanza");
-                    String nome = rs.getString("nomeStanza");
-                    String link = rs.getString("link");
-                    listaStanzeAggiornata.add(new Stanza(id, cf, nome, link));
-                }
+            // 4. GestioneStanzeCtrl fa una queryDBMSLinkStanza() per recuperare il link
+            rs = DBMSboundary.getInstance().queryDBMSLinkStanza(idStanza);
+
+            if (rs != null && rs.next()) {
+                linkDaCopiare = rs.getString("link");
+
+                // 5. GestioneStanzeCtrl crea FinestraCopiaLinkView
+                Router.mostraFinestraCopiaLinkView(event);
+            } else {
+                new ErrorText("Impossibile recuperare il link della stanza.").okay();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -282,8 +344,24 @@ public class GestioneStanzeCtrl {
                 if (rs != null && !rs.isClosed()) rs.getStatement().close();
             } catch (Exception ignore) {}
         }
+    }
 
-        Router.mostraGestioneStanzeView(event);
+    // 6. L'artista cliccaCopiaLink() dentro FinestraCopiaLinkView
+    @FXML
+    void cliccaCopiaLink(ActionEvent event) {
+
+        // 7. Il link viene copiato negli appunti (utilizzando l'API Clipboard di JavaFX)
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(linkDaCopiare);
+        clipboard.setContent(content);
+
+        // (Mostra un piccolo popup)
+        SuccessfulText success = new SuccessfulText("Link copiato negli appunti con successo!");
+        success.okay();
+
+        // 8. GestioneStanzeCtrl invoca il metodo mostraGestioneStanzeView.
+        mostraGestioneStanzeView(event);
     }
 
 

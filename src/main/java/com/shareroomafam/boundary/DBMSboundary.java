@@ -327,4 +327,12 @@ public class DBMSboundary {
         String sql = "SELECT * FROM STANZA WHERE codiceFiscale_artista = ?";
         return queryDBMS(sql, codiceFiscale);
     }
+
+    // --- METODI PER SEQUENCE GESTIONE STANZE (Condividi Stanza) ---
+
+    public ResultSet queryDBMSLinkStanza(int idStanza) throws SQLException {
+        // Recupera il link univoco associato all'ID della stanza
+        String sql = "SELECT link FROM STANZA WHERE idStanza = ?";
+        return queryDBMS(sql, idStanza);
+    }
 }

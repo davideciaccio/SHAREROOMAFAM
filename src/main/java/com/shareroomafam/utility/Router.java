@@ -144,4 +144,8 @@ public class Router {
     public static void mostraDocumentiScaricabiliChecklist(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/DocumentiScaricabiliChecklist.fxml", "ShareRoom AFAM - Permessi Download");
     }
+
+    public static void mostraFinestraCopiaLinkView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/FinestraCopiaLinkView.fxml", "ShareRoom AFAM - Condividi Stanza");
+    }
 }
