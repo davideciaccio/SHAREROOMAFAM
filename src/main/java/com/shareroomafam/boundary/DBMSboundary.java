@@ -377,4 +377,18 @@ public class DBMSboundary {
         String sql = "INSERT INTO CONTIENE (idStanza, idDocumento, scaricabile) VALUES (?, ?, ?)";
         insertDBMS(sql, idStanza, idDocumento, scaricabile);
     }
+
+    // --- METODI PER SEQUENCE MODIFICA STANZA (Rimuovi Documenti) ---
+
+    public ResultSet queryDBMSListaDocumentiStanza(int idStanza) throws SQLException {
+        // Estrae i documenti che sono PRESENTI nella stanza usando una JOIN tra DOCUMENTO e CONTIENE
+        String sql = "SELECT D.* FROM DOCUMENTO D JOIN CONTIENE C ON D.idDocumento = C.idDocumento WHERE C.idStanza = ?";
+        return queryDBMS(sql, idStanza);
+    }
+
+    public int queryDBMSRemoveDocumentiStanza(int idStanza, int idDocumento) throws SQLException {
+        // Rimuove il legame tra la stanza e il documento dalla tabella CONTIENE
+        String sql = "DELETE FROM CONTIENE WHERE idStanza = ? AND idDocumento = ?";
+        return insertDBMS(sql, idStanza, idDocumento);
+    }
 }

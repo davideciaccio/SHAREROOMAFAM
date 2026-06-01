@@ -168,4 +168,8 @@ public class Router {
     public static void mostraModificaDocumentiScaricabiliChecklist(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/ModificaDocumentiScaricabiliChecklist.fxml", "ShareRoom AFAM - Permessi Download Nuovi Documenti");
     }
+
+    public static void mostraDocumentiDaRimuovereChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/DocumentiDaRimuovereChecklist.fxml", "ShareRoom AFAM - Rimuovi Documenti");
+    }
 }

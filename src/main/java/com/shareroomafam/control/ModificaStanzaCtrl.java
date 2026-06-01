@@ -3,6 +3,7 @@ package com.shareroomafam.control;
 import com.shareroomafam.boundary.DBMSboundary;
 import com.shareroomafam.entity.Documento;
 import com.shareroomafam.entity.Stanza;
+import com.shareroomafam.textmessage.ConfirmText;
 import com.shareroomafam.textmessage.ErrorText;
 import com.shareroomafam.textmessage.SuccessfulText;
 import com.shareroomafam.utility.Router;
@@ -29,12 +30,18 @@ public class ModificaStanzaCtrl {
     @FXML private ListView<HBox> documentiDaInserireListView;
     @FXML private ListView<HBox> documentiScaricabiliModificaListView;
 
+    // Checklist per Rimuovi Documenti
+    @FXML private ListView<HBox> documentiDaRimuovereListView;
+
     // Questa variabile riceve la stanza su cui si è cliccato "Modifica" dalla GestioneStanzeCtrl
     public static Stanza stanzaInModifica;
 
     // Variabili di stato per il Sequence Aggiungi Documenti
     private static List<Documento> listaDocumentiNonInStanza = new ArrayList<>();
     private static List<Documento> listaDocumentiDainserire = new ArrayList<>();
+
+    // Variabili di stato per il Sequence Rimuovi Documenti
+    private static List<Documento> listaDocumentiStanza = new ArrayList<>();
 
     @FXML
     public void initialize() {
@@ -65,6 +72,21 @@ public class ModificaStanzaCtrl {
                 Label lbl = new Label(f.getName());
                 row.getChildren().addAll(cb, lbl);
                 documentiScaricabiliModificaListView.getItems().add(row);
+            }
+        }
+
+        // Popola la DocumentiDaRimuovereChecklist
+        if (documentiDaRimuovereListView != null && !listaDocumentiStanza.isEmpty()) {
+            documentiDaRimuovereListView.getItems().clear();
+            for (Documento doc : listaDocumentiStanza) {
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
+                CheckBox cb = new CheckBox();
+                cb.setUserData(doc.getIdDocumento()); // Salviamo l'ID per la rimozione
+                File f = new File(doc.getPercorso());
+                Label lbl = new Label(f.getName());
+                row.getChildren().addAll(cb, lbl);
+                documentiDaRimuovereListView.getItems().add(row);
             }
         }
     }
@@ -291,6 +313,103 @@ public class ModificaStanzaCtrl {
 
 
     // ==========================================
+    // SEQUENCE: Gestione stanze – Modifica stanza – Rimuovi documenti
+    // ==========================================
+
+    // 1. L'artista cliccaRimuoviDocumenti() dentro ModificaStanzaView
+    @FXML
+    void cliccaRimuoviDocumenti(ActionEvent event) {
+        // 2. ModificaStanzaView crea ModificaStanzaCtrl (JavaFX)
+
+        ResultSet rs = null;
+        try {
+            // 3. ModificaStanzaCtrl fa una queryDBMSListaDocumentiStanza() alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSListaDocumentiStanza(stanzaInModifica.getIdStanza());
+
+            listaDocumentiStanza.clear();
+            if (rs != null) {
+                while(rs.next()) {
+                    String cf = rs.getString("codiceFiscale_artista");
+                    int idDoc = rs.getInt("idDocumento");
+                    boolean vis = rs.getBoolean("visibile");
+                    String percorso = rs.getString("percorso");
+                    listaDocumentiStanza.add(new Documento(idDoc, cf, vis, percorso));
+                }
+            }
+
+            if (listaDocumentiStanza.isEmpty()) {
+                new ErrorText("Non ci sono documenti da rimuovere nella stanza.").okay();
+                return;
+            }
+
+            // 4. ModificaStanzaCtrl crea DocumentiDaRimuovereChecklist
+            Router.mostraDocumentiDaRimuovereChecklist(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore nel recupero dei documenti dal database.").okay();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) rs.getStatement().close();
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 6. L'artista cliccaConferma() dentro DocumentiDaRimuovereChecklist
+    @FXML
+    void cliccaConfermaRimozione(ActionEvent event) {
+        List<Integer> idsDaRimuovere = new ArrayList<>();
+
+        // 5. L'artista selezionaDocumentiDaRimuovere() dentro DocumentiDaRimuovereChecklist
+        for (HBox row : documentiDaRimuovereListView.getItems()) {
+            CheckBox cb = (CheckBox) row.getChildren().get(0);
+            if (cb.isSelected()) {
+                idsDaRimuovere.add((Integer) cb.getUserData());
+            }
+        }
+
+        if (idsDaRimuovere.isEmpty()) {
+            new ErrorText("Seleziona almeno un documento da rimuovere.").okay();
+            return;
+        }
+
+        // 7. ModificaStanzaCtrl crea ConfirmText
+        ConfirmText confirm = new ConfirmText("Sei sicuro di voler eliminare i documenti selezionati?");
+
+        // 8. L'artista cliccaSi() dentro ConfirmText
+        if (confirm.si()) {
+            // 9. DocumentiDaRimuovereChecklist fa passaDati() alla ModificaStanzaCtrl
+            Integer[] idArray = idsDaRimuovere.toArray(new Integer[0]);
+            passaDati(event, idArray);
+        }
+    }
+
+    // Overload 3: Riceve gli ID dei documenti da sganciare dalla stanza
+    private void passaDati(ActionEvent event, Integer[] idsDaRimuovere) {
+        try {
+            for (Integer idDoc : idsDaRimuovere) {
+                // 10. ModificaStanzaCtrl fa una queryDBMSRemoveDocumenti() alla DBMSBoundary
+                DBMSboundary.getInstance().queryDBMSRemoveDocumentiStanza(stanzaInModifica.getIdStanza(), idDoc);
+            }
+
+            // 11. ModificaStanzaCtrl fa la setDati() sulla StanzaEntity
+            // (L'entity Stanza non salva liste di documenti in RAM, la logica di update avviene su DBMS come programmato)
+
+            // 12. ModificaStanzaCtrl distrugge ConfirmText (implicito in ConfirmText.si())
+            // 13. ModificaStanzaCtrl distrugge DocumentiDaRimuovereChecklist
+            listaDocumentiStanza.clear();
+
+            // 14. ModificaStanzaCtrl invoca il metodo mostraModificaStanzaView()
+            mostraModificaStanzaView(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore durante la rimozione dei documenti dal DB.").okay();
+        }
+    }
+
+
+    // ==========================================
     // METODI DI ROUTING GLOBALI / STUB
     // ==========================================
 
@@ -301,13 +420,11 @@ public class ModificaStanzaCtrl {
 
     @FXML
     void tornaAGestioneStanze(ActionEvent event) {
-        // Ripuliamo l'oggetto temporaneo prima di tornare alla lista generale
         stanzaInModifica = null;
         Router.mostraGestioneStanzeView(event);
     }
 
-    // Stub pronti per i futuri Sequence Diagram della Modifica Stanza
-    @FXML void cliccaRimuoviDocumenti(ActionEvent event) {}
+    // Stub pronto per il Sequence Diagram
     @FXML void cliccaRendiDocumentoScaricabile(ActionEvent event) {}
 
     // ==========================================
