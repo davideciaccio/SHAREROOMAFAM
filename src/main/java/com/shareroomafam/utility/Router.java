@@ -131,4 +131,17 @@ public class Router {
     public static void mostraDocumentiCaricatiChecklist(ActionEvent event) {
         cambiaScena(event, "/com/shareroomafam/view/DocumentiCaricatiChecklist.fxml", "ShareRoom AFAM - Cambia Stato Documenti");
     }
+
+    public static void mostraGestioneStanzeView(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/GestioneStanzeView.fxml", "ShareRoom AFAM - Gestione Stanze");
+    }
+    public static void mostraInserisciNomeStanzaForm(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/InserisciNomeStanzaForm.fxml", "ShareRoom AFAM - Crea Stanza");
+    }
+    public static void mostraDocumentiChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/DocumentiChecklist.fxml", "ShareRoom AFAM - Seleziona Documenti per Stanza");
+    }
+    public static void mostraDocumentiScaricabiliChecklist(ActionEvent event) {
+        cambiaScena(event, "/com/shareroomafam/view/DocumentiScaricabiliChecklist.fxml", "ShareRoom AFAM - Permessi Download");
+    }
 }

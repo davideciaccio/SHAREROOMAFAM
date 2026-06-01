@@ -545,4 +545,9 @@ public class AuthCtrl {
     void apriGestioneProfilo(ActionEvent event) {
         com.shareroomafam.utility.Router.mostraGestioneProfiloView(event);
     }
+
+    @FXML
+    void apriGestioneStanze(ActionEvent event) {
+        com.shareroomafam.utility.Router.mostraGestioneStanzeView(event);
+    }
 }

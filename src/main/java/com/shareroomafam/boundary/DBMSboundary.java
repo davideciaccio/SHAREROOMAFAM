@@ -302,4 +302,29 @@ public class DBMSboundary {
         String sql = "UPDATE DOCUMENTO SET visibile = ? WHERE idDocumento = ?";
         return insertDBMS(sql, visibile, idDocumento);
     }
+
+    // --- METODI PER SEQUENCE GESTIONE STANZE (Crea Stanza) ---
+
+    public ResultSet queryDBMSVerificaNomeStanza(String codiceFiscale, String nomeStanza) throws SQLException {
+        // Controlla se l'artista ha già una stanza con quel preciso nome
+        String sql = "SELECT * FROM STANZA WHERE codiceFiscale_artista = ? AND nomeStanza = ?";
+        return queryDBMS(sql, codiceFiscale, nomeStanza);
+    }
+
+    public int insertDBMSStanza(String codiceFiscale, String nomeStanza, String link) throws SQLException {
+        // Inserisce la stanza e restituisce l'ID generato in automatico dal DBMS
+        String sql = "INSERT INTO STANZA (codiceFiscale_artista, nomeStanza, link) VALUES (?, ?, ?)";
+        return insertDBMS(sql, codiceFiscale, nomeStanza, link);
+    }
+
+    public void insertDBMSContieneDocumento(int idStanza, int idDocumento, boolean scaricabile) throws SQLException {
+        // Inserisce il record nella tabella di relazione CONTIENE
+        String sql = "INSERT INTO CONTIENE (idStanza, idDocumento, scaricabile) VALUES (?, ?, ?)";
+        insertDBMS(sql, idStanza, idDocumento, scaricabile);
+    }
+
+    public ResultSet queryDBMSListaStanze(String codiceFiscale) throws SQLException {
+        String sql = "SELECT * FROM STANZA WHERE codiceFiscale_artista = ?";
+        return queryDBMS(sql, codiceFiscale);
+    }
 }
