@@ -378,11 +378,11 @@ public class DBMSboundary {
         insertDBMS(sql, idStanza, idDocumento, scaricabile);
     }
 
-    // --- METODI PER SEQUENCE MODIFICA STANZA (Rimuovi Documenti) ---
+    // --- METODI PER SEQUENCE MODIFICA STANZA (Rimuovi Documenti & Cambia Stato) ---
 
     public ResultSet queryDBMSListaDocumentiStanza(int idStanza) throws SQLException {
-        // Estrae i documenti che sono PRESENTI nella stanza usando una JOIN tra DOCUMENTO e CONTIENE
-        String sql = "SELECT D.* FROM DOCUMENTO D JOIN CONTIENE C ON D.idDocumento = C.idDocumento WHERE C.idStanza = ?";
+        // Estrae i documenti PRESENTI nella stanza e il loro stato "scaricabile" dalla tabella CONTIENE
+        String sql = "SELECT D.*, C.scaricabile FROM DOCUMENTO D JOIN CONTIENE C ON D.idDocumento = C.idDocumento WHERE C.idStanza = ?";
         return queryDBMS(sql, idStanza);
     }
 
@@ -390,5 +390,11 @@ public class DBMSboundary {
         // Rimuove il legame tra la stanza e il documento dalla tabella CONTIENE
         String sql = "DELETE FROM CONTIENE WHERE idStanza = ? AND idDocumento = ?";
         return insertDBMS(sql, idStanza, idDocumento);
+    }
+
+    public int queryDBMSUpdateScaricabiliENonScaricabiliDocumentiStanza(int idStanza, int idDocumento, boolean scaricabile) throws SQLException {
+        // Aggiorna lo stato "scaricabile" del documento all'interno della specifica stanza
+        String sql = "UPDATE CONTIENE SET scaricabile = ? WHERE idStanza = ? AND idDocumento = ?";
+        return insertDBMS(sql, scaricabile, idStanza, idDocumento);
     }
 }

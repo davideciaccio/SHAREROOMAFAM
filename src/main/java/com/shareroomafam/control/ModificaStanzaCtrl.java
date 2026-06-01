@@ -33,6 +33,9 @@ public class ModificaStanzaCtrl {
     // Checklist per Rimuovi Documenti
     @FXML private ListView<HBox> documentiDaRimuovereListView;
 
+    // Checklist per Modifica Stato Scaricabile
+    @FXML private ListView<HBox> documentiStatoScaricabileListView;
+
     // Questa variabile riceve la stanza su cui si è cliccato "Modifica" dalla GestioneStanzeCtrl
     public static Stanza stanzaInModifica;
 
@@ -40,8 +43,10 @@ public class ModificaStanzaCtrl {
     private static List<Documento> listaDocumentiNonInStanza = new ArrayList<>();
     private static List<Documento> listaDocumentiDainserire = new ArrayList<>();
 
-    // Variabili di stato per il Sequence Rimuovi Documenti
+    // Variabili di stato per il Sequence Rimuovi Documenti e rendiScaricabile/nonScaricabile
     private static List<Documento> listaDocumentiStanza = new ArrayList<>();
+    private static List<DocumentoStatoSetup> listaDocumentiStato = new ArrayList<>();
+
 
     @FXML
     public void initialize() {
@@ -87,6 +92,25 @@ public class ModificaStanzaCtrl {
                 Label lbl = new Label(f.getName());
                 row.getChildren().addAll(cb, lbl);
                 documentiDaRimuovereListView.getItems().add(row);
+            }
+        }
+
+        // Popola la DocumentiScaricabiliENonChecklist
+        if (documentiStatoScaricabileListView != null && !listaDocumentiStato.isEmpty()) {
+            documentiStatoScaricabileListView.getItems().clear();
+            for (DocumentoStatoSetup item : listaDocumentiStato) {
+                HBox row = new HBox(10);
+                row.setAlignment(Pos.CENTER_LEFT);
+                CheckBox cb = new CheckBox();
+
+                // Pre-imposta la spunta in base allo stato nel DBMS
+                cb.setSelected(item.scaricabile);
+                cb.setUserData(item.doc.getIdDocumento());
+
+                File f = new File(item.doc.getPercorso());
+                Label lbl = new Label(f.getName());
+                row.getChildren().addAll(cb, lbl);
+                documentiStatoScaricabileListView.getItems().add(row);
             }
         }
     }
@@ -410,6 +434,97 @@ public class ModificaStanzaCtrl {
 
 
     // ==========================================
+    // SEQUENCE: Gestione stanze – Modifica stanza – Rendi documento scaricabile / non scaricabile
+    // ==========================================
+
+    // 1. L'artista cliccaRendiDocumentoScaricabile/nonScaricabile() dentro ModificaStanzaView
+    @FXML
+    void cliccaRendiDocumentoScaricabile(ActionEvent event) {
+        // 2. ModificaStanzaView crea ModificaStanzaCtrl (JavaFX)
+
+        ResultSet rs = null;
+        try {
+            // 3. ModificaStanzaCtrl fa una queryDBMSListaDocumentiStanza() alla DBMSBoundary
+            rs = DBMSboundary.getInstance().queryDBMSListaDocumentiStanza(stanzaInModifica.getIdStanza());
+
+            listaDocumentiStato.clear();
+            if (rs != null) {
+                while(rs.next()) {
+                    String cf = rs.getString("codiceFiscale_artista");
+                    int idDoc = rs.getInt("idDocumento");
+                    boolean vis = rs.getBoolean("visibile");
+                    String percorso = rs.getString("percorso");
+                    boolean scaricabile = rs.getBoolean("scaricabile"); // Estraiamo lo stato attuale
+
+                    Documento doc = new Documento(idDoc, cf, vis, percorso);
+                    listaDocumentiStato.add(new DocumentoStatoSetup(doc, scaricabile));
+                }
+            }
+
+            if (listaDocumentiStato.isEmpty()) {
+                new ErrorText("Non ci sono documenti presenti nella stanza.").okay();
+                return;
+            }
+
+            // 4. ModificaStanzaCtrl crea DocumentiScaricabiliENonChecklist
+            Router.mostraDocumentiScaricabiliENonChecklist(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore nel recupero dei documenti dal database.").okay();
+        } finally {
+            try {
+                if (rs != null && !rs.isClosed()) rs.getStatement().close();
+            } catch (Exception ignore) {}
+        }
+    }
+
+    // 7. L'artista cliccaSalva() dentro DocumentiScaricabiliENonChecklist
+    @FXML
+    void cliccaSalvaStato(ActionEvent event) {
+        List<DocumentoDownload> nuoviStatiList = new ArrayList<>();
+
+        // 5. e 6. L'artista seleziona/deseleziona documenti dentro DocumentiScaricabiliENonChecklist
+        for (HBox row : documentiStatoScaricabileListView.getItems()) {
+            CheckBox cb = (CheckBox) row.getChildren().get(0);
+            int idDoc = (Integer) cb.getUserData();
+            boolean isScaricabile = cb.isSelected();
+
+            nuoviStatiList.add(new DocumentoDownload(idDoc, isScaricabile));
+        }
+
+        // 8. DocumentiScaricabiliENonChecklist fa passaDati() alla ModificaStanzaCtrl
+        passaDatiStato(event, nuoviStatiList);
+    }
+
+    // Overload 4: Riceve la lista degli stati modificati per l'aggiornamento
+    private void passaDatiStato(ActionEvent event, List<DocumentoDownload> nuoviStatiList) {
+        try {
+            for (DocumentoDownload stato : nuoviStatiList) {
+                // 9. ModificaStanzaCtrl fa una queryDBMSUpdateScaricabiliENonScaricabiliDocumentiStanza() alla DBMSBoundary
+                DBMSboundary.getInstance().queryDBMSUpdateScaricabiliENonScaricabiliDocumentiStanza(stanzaInModifica.getIdStanza(), stato.idDocumento, stato.scaricabile);
+            }
+
+            // 10. ModificaStanzaCtrl fa la setDati() sulla StanzaEntity
+            // (La logica è demandata al DB, l'entity in memoria rimane coerente anagraficamente)
+
+            // Creazione messaggio di successo (nel RAD manca step esplicito di SuccessfulText, ma lo allineiamo agli altri Modifica)
+            new SuccessfulText("Permessi aggiornati con successo.").okay();
+
+            // 11. ModificaStanzaCtrl distrugge DocumentiScaricabiliENonChecklist
+            listaDocumentiStato.clear();
+
+            // 12. ModificaStanzaCtrl invoca il metodo mostraModificaStanzaView()
+            mostraModificaStanzaView(event);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            new ErrorText("Errore durante l'aggiornamento dei permessi nel DB.").okay();
+        }
+    }
+
+
+    // ==========================================
     // METODI DI ROUTING GLOBALI / STUB
     // ==========================================
 
@@ -424,17 +539,24 @@ public class ModificaStanzaCtrl {
         Router.mostraGestioneStanzeView(event);
     }
 
-    // Stub pronto per il Sequence Diagram
-    @FXML void cliccaRendiDocumentoScaricabile(ActionEvent event) {}
 
     // ==========================================
-    // CLASSE SUPPORTO INTERNA
+    // CLASSI SUPPORTO INTERNE
     // ==========================================
     private static class DocumentoDownload {
         int idDocumento;
         boolean scaricabile;
         DocumentoDownload(int id, boolean scaricabile) {
             this.idDocumento = id;
+            this.scaricabile = scaricabile;
+        }
+    }
+
+    private static class DocumentoStatoSetup {
+        Documento doc;
+        boolean scaricabile;
+        DocumentoStatoSetup(Documento doc, boolean scaricabile) {
+            this.doc = doc;
             this.scaricabile = scaricabile;
         }
     }
