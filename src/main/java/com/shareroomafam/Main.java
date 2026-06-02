@@ -36,8 +36,8 @@ public class Main extends Application {
 
         primaryStage.setTitle("ShareRoom AFAM - Login");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(true);
-        primaryStage.setMaximized(true);
+        primaryStage.setResizable(false);
+        primaryStage.setMaximized(false);
         primaryStage.show();
     }
 
