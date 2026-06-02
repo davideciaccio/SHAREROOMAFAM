@@ -245,7 +245,7 @@ public class VisualizzaProfiliCtrl {
                     String nome = rs.getString("nome");
                     String cognome = rs.getString("cognome");
 
-                    // Formatta la stringa da mostrare nella lista (es. "Michelangelo (Michelangelo Buonarroti)")
+                    // Formatta la stringa da mostrare nella lista
                     risultatiRicercaTemporanei.add(new String[]{cf, "🎭 " + nomeDarte + " - (" + nome + " " + cognome + ")"});
                 }
             }

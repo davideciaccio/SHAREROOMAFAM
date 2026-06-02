@@ -14,7 +14,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        // ---> NOVITÀ: Avvio del Web Server Locale in background <---
+        // Avvio del Web Server Locale in background
         WebServerManager.startServer();
 
         // 1. Definiamo il percorso del file FXML
@@ -36,11 +36,12 @@ public class Main extends Application {
 
         primaryStage.setTitle("ShareRoom AFAM - Login");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false); // Blocchiamo il ridimensionamento per mantenere il layout pulito
+        primaryStage.setResizable(true);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 
-    // ---> NOVITÀ: Spegnimento pulito del Server alla chiusura dell'app <---
+    // Spegnimento pulito del Server alla chiusura dell'app
     @Override
     public void stop() throws Exception {
         WebServerManager.stopServer();

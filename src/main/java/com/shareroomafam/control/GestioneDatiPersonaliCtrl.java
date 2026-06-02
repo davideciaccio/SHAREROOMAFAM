@@ -11,7 +11,16 @@ import javafx.scene.control.TextField;
 
 import java.sql.ResultSet;
 
+// Import necessari per la criptazione AES
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+
 public class GestioneDatiPersonaliCtrl {
+
+    // --- CHIAVE SEGRETA PER CRIPTAZIONE AES (16 byte esatti per AES-128) ---
+    // Allineata con la chiave presente in AuthCtrl
+    private static final String SECRET_KEY = "ShareRoomAfamKey";
 
     // Casella di testo del ModificaPasswordForm
     @FXML private PasswordField nuovaPasswordField;
@@ -60,9 +69,15 @@ public class GestioneDatiPersonaliCtrl {
 
             String cf = GestioneProfiloCtrl.artistaLoggato.getCodiceFiscale();
 
+            // ==========================================
+            // CRIPTAZIONE NUOVA PASSWORD
+            // ==========================================
+            // Criptiamo la password prima di inviarla al DBMS per i controlli
+            String nuovaPasswordCriptata = cripta(nuovaPassword);
+
             // 7. GestioneDatiPersonaliCtrl fa una queryDBMSVerificaPassword() alla DBMSBoundary
-            // La query cerca l'artista usando CF e la NUOVA password, se lo trova significa che la nuova password è uguale alla vecchia
-            rs = DBMSboundary.getInstance().queryDBMSVerificaPassword(cf, nuovaPassword);
+            // La query cerca l'artista usando CF e la NUOVA password criptata, se lo trova significa che la nuova password è uguale alla vecchia
+            rs = DBMSboundary.getInstance().queryDBMSVerificaPassword(cf, nuovaPasswordCriptata);
 
             boolean passwordUgualeAttuale = false;
             if (rs != null && rs.next()) {
@@ -80,11 +95,12 @@ public class GestioneDatiPersonaliCtrl {
             } else {
                 // 9. ELSE Password diversa da quella attuale
 
-                // 9.1 GestioneDatiPersonaliCtrl fa una updateDBMSPassword() alla DBMSBoundary e aggiorna il db con la nuovapassword
-                DBMSboundary.getInstance().updateDBMSPassword(cf, nuovaPassword);
+                // 9.1 GestioneDatiPersonaliCtrl fa una updateDBMSPassword() alla DBMSBoundary e aggiorna il db con la nuovapassword criptata
+                DBMSboundary.getInstance().updateDBMSPassword(cf, nuovaPasswordCriptata);
 
                 // 9.2 GestioneDatiPersonaliCtrl fa una SetNuovaPassword() sulla entity Artista
-                // Usiamo il setter dell'entity salvata nella sessione
+                // Usiamo il setter dell'entity salvata nella sessione.
+                // Manteniamo la password in chiaro nell'Entity locale per coerenza con la logica di login/registrazione.
                 GestioneProfiloCtrl.artistaLoggato.setPassword(nuovaPassword);
 
                 // 9.3 GestioneDatiPersonaliCtrl crea SuccessfulText, L'artista cliccaOkay(), destroy
@@ -216,5 +232,23 @@ public class GestioneDatiPersonaliCtrl {
     @FXML
     void cliccaModificaCarriera(ActionEvent event) {
         Router.mostraModificaCarrieraView(event);
+    }
+
+    // ==========================================
+    // UTILITY DI CRITTOGRAFIA (Aggiunte per allineamento ad AuthCtrl)
+    // ==========================================
+
+    // Metodo per criptare la password prima di inviarla al DBMS
+    private static String cripta(String stringa) {
+        try {
+            SecretKeySpec secretKey = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] stringaCriptata = cipher.doFinal(stringa.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(stringaCriptata);
+        } catch (Exception e) {
+            System.err.println("Errore durante la criptazione in GestioneDatiPersonaliCtrl: " + e.getMessage());
+        }
+        return null;
     }
 }

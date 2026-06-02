@@ -14,11 +14,18 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+// Import necessari per la criptazione AES (TASK 1)
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.Random;
 
 public class AuthCtrl {
+
+    // --- CHIAVE SEGRETA PER CRIPTAZIONE AES (16 byte esatti per AES-128) ---
+    private static final String SECRET_KEY = "ShareRoomAfamKey";
 
     // --- VARIABILE DI STATO GLOBALE PER IL LOGIN 2FA ---
     private static String emailInAttesaDiVerifica;  // Per Login 2FA
@@ -99,8 +106,12 @@ public class AuthCtrl {
     private void passadati(ActionEvent event, String email, String password) {
         ResultSet rs = null;
         try {
+            // CRIPTAZIONE: Criptiamo la password immessa prima di cercarla nel DB
+            String passwordCriptataInput = cripta(password);
+
             // 3.2.1 L'AuthCtrl fa una queryDBMSverificaCredenziali() alla DBMSBoundary
-            rs = DBMSboundary.getInstance().queryDBMSverificaCredenziali(email, password);
+            // NOTA: Passiamo la password criptata!
+            rs = DBMSboundary.getInstance().queryDBMSverificaCredenziali(email, passwordCriptataInput);
 
             // 4. IF Credenziali sono corrette
             if (rs != null && rs.next()) {
@@ -179,9 +190,12 @@ public class AuthCtrl {
                 String sesso = rs.getString("sesso");
                 String nomeDarte = rs.getString("nomeDarte");
                 String email = rs.getString("email");
-                String password = rs.getString("password");
 
-                Artista artista = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, password, null);
+                // (Decriptiamo la password quando creiamo l'Entity in sessione
+                String passwordCriptataDB = rs.getString("password");
+                String passwordDecriptata = decripta(passwordCriptataDB);
+
+                Artista artista = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, passwordDecriptata, null);
                 System.out.println("Accesso completato per l'artista: " + artista.getNome() + " " + artista.getCognome());
                 // AGGIUNGI QUESTA RIGA PER SALVARE LA SESSIONE!
                 GestioneProfiloCtrl.artistaLoggato = artista;
@@ -258,27 +272,46 @@ public class AuthCtrl {
                 rs.getStatement().close();
             }
 
+            // ==========================================
+            // CONTROLLI DI SICUREZZA PASSWORD
+            // ==========================================
             // 5. IF CODICE FISCALE IN USO O EMAIL IN USO O PASSWORD NON RISPETTA I CRITERI DI SICUREZZA
-            boolean passwordNonSicura = password.length() < 8;
+            // Almeno 8 caratteri, almeno 1 maiuscola, almeno 1 numero, almeno 1 carattere speciale
+            boolean passwordNonSicura = password.length() < 8 ||
+                    !password.matches(".*[A-Z].*") ||
+                    !password.matches(".*\\d.*") ||
+                    !password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*");
 
             if (esisteGia || passwordNonSicura) {
                 // 5.1 AuthCtrl Create Error Text
-                ErrorText errorText = new ErrorText("Registrazione fallita");
+                // Personalizziamo l'errore se è un problema di sicurezza della password
+                String msgErrore = esisteGia ? "Registrazione fallita: Utente o Email già in uso"
+                        : "La password deve avere almeno 8 caratteri, 1 Maiuscola, 1 Numero e 1 Carattere Speciale.";
+
+                ErrorText errorText = new ErrorText(msgErrore);
                 // 5.2 L'utente clicca okay() segue destroy di errortext
                 errorText.okay();
                 // 6.3 Il sistema mostra a video il form “Dati anagrafici” (è già a video, quindi non fa nulla)
 
             } else {
+                // ==========================================
+                // CRIPTAZIONE PASSWORD PER REGISTRAZIONE
+                // ==========================================
+                String passwordCriptata = cripta(password);
+
                 // 6. ELSE
-                // 6.2 Viene creata un Artista entity
+                // 6.2 Viene creata un Artista entity (Manteniamo la password in chiaro nell'Entity locale)
                 Artista artista = new Artista(cf, nome, cognome, null, sesso, nomeDarte, email, password, null);
 
                 // 6.3 Vengono settati i dati all'artista entity grazie al metodo SetDati
                 artista.setDati(cf, nome, cognome, dataNascita.atStartOfDay(), sesso, nomeDarte, email, password, null);
                 // Set dell'immagine di default nell'Entity ---
                 artista.setDefaultImageProfile();
+
                 // 6.1 Authctrl invoca il metodo InsertDBMSCreaProfilo() alla DBMS Boundary
-                DBMSboundary.getInstance().InsertDBMSCreaProfilo(cf, nome, cognome, java.sql.Date.valueOf(dataNascita), sesso, nomeDarte, email, password, carriera, anniCarriera);
+                // NOTA BENE: Inviamo al DBMS la "passwordCriptata" e NON quella in chiaro
+                DBMSboundary.getInstance().InsertDBMSCreaProfilo(cf, nome, cognome, java.sql.Date.valueOf(dataNascita), sesso, nomeDarte, email, passwordCriptata, carriera, anniCarriera);
+
                 // Aggiornamento del DB con l'immagine di default ---
                 DBMSboundary.getInstance().updateDBMSDefaultImageProfile(cf);
                 // 6.4 AuthControl genera un Successful text()
@@ -479,7 +512,11 @@ public class AuthCtrl {
                 // 11.1 AuthCtrl fa una queryDBMSRecuperaPassword() alla DBMSBoundary
                 ResultSet rsPass = DBMSboundary.getInstance().queryDBMSRecuperaPassword(emailPerRecupero);
                 if (rsPass != null && rsPass.next()) {
-                    passwordRecuperataCorrente = rsPass.getString("password");
+                    // Decriptiamo la password prima di passarla alla variabile statica
+                    // che verrà poi mostrata a video nella MostraPasswordView
+                    String passwordCriptataNelDB = rsPass.getString("password");
+                    passwordRecuperataCorrente = decripta(passwordCriptataNelDB);
+
                     rsPass.getStatement().close();
                 }
 
@@ -549,5 +586,39 @@ public class AuthCtrl {
     @FXML
     void apriGestioneStanze(ActionEvent event) {
         com.shareroomafam.utility.Router.mostraGestioneStanzeView(event);
+    }
+
+
+    // ==========================================
+    // UTILITY DI CRITTOGRAFIA
+    // ==========================================
+
+    // Metodo per criptare la password prima di salvarla nel DB
+    private static String cripta(String stringa) {
+        try {
+            SecretKeySpec secretKey = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] stringaCriptata = cipher.doFinal(stringa.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(stringaCriptata);
+        } catch (Exception e) {
+            System.err.println("Errore durante la criptazione: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // Metodo per decriptare la password quando viene recuperata dal DB
+    private static String decripta(String stringaCriptata) {
+        try {
+            SecretKeySpec secretKey = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            byte[] decodedBytes = Base64.getDecoder().decode(stringaCriptata);
+            byte[] stringaDecriptata = cipher.doFinal(decodedBytes);
+            return new String(stringaDecriptata, "UTF-8");
+        } catch (Exception e) {
+            System.err.println("Errore durante la decriptazione: " + e.getMessage());
+        }
+        return null;
     }
 }
