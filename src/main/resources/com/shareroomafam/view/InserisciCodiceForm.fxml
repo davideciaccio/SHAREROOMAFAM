@@ -5,25 +5,28 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.AuthCtrl" prefWidth="400.0" prefHeight="300.0">
-    <padding>
-        <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
-    </padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.AuthCtrl">
+    <VBox alignment="CENTER" spacing="15.0" prefWidth="400.0" prefHeight="300.0" maxWidth="400" maxHeight="300">
+        <padding>
+            <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
+        </padding>
 
-    <Label text="Autenticazione a due fattori">
-        <font>
-            <Font name="System Bold" size="18.0" />
-        </font>
-    </Label>
+        <Label text="Autenticazione a due fattori">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Label>
 
-    <Label text="Inserisci il codice che ti abbiamo inviato via e-mail." textFill="#555555" wrapText="true" textAlignment="CENTER"/>
+        <Label text="Inserisci il codice che ti abbiamo inviato via e-mail." textFill="#555555" wrapText="true" textAlignment="CENTER"/>
 
-    <TextField fx:id="codiceField" promptText="Codice a 6 cifre" alignment="CENTER">
-        <font>
-            <Font size="18.0" />
-        </font>
-    </TextField>
+        <TextField fx:id="codiceField" promptText="Codice a 6 cifre" alignment="CENTER">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </TextField>
 
-    <Button mnemonicParsing="false" onAction="#cliccaInvia" maxWidth="Infinity" text="Invia" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
-</VBox>
+        <Button mnemonicParsing="false" onAction="#cliccaInvia" maxWidth="Infinity" text="Invia" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    </VBox>
+</StackPane>

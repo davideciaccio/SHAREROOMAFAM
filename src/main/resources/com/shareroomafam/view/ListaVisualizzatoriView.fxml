@@ -3,16 +3,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.GestioneStanzeCtrl" prefWidth="500.0" prefHeight="400.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.GestioneStanzeCtrl">
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="500.0" prefHeight="400.0" maxWidth="500" maxHeight="400">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <Label text="Lista Visualizzatori">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
-    <Label text="Utenti che hanno visualizzato questa stanza:" textFill="#555555" />
+        <Label text="Lista Visualizzatori">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
+        <Label text="Utenti che hanno visualizzato questa stanza:" textFill="#555555" />
 
-    <ListView fx:id="visualizzatoriListView" VBox.vgrow="ALWAYS" />
+        <ListView fx:id="visualizzatoriListView" VBox.vgrow="ALWAYS" />
 
-    <Button mnemonicParsing="false" onAction="#cliccaChiudi" maxWidth="Infinity" text="Chiudi" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
-</VBox>
+        <Button mnemonicParsing="false" onAction="#cliccaChiudi" maxWidth="Infinity" text="Chiudi" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
+    </VBox>
+</StackPane>

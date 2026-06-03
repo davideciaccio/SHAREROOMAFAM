@@ -3,14 +3,17 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.GestioneStanzeCtrl" prefWidth="400.0" prefHeight="300.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.GestioneStanzeCtrl">
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="400.0" prefHeight="300.0" maxWidth="400" maxHeight="300">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <Label text="Crea nuova stanza">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
-    <TextField fx:id="nomeStanzaField" promptText="Inserisci il nome della stanza..." />
-    <Button mnemonicParsing="false" onAction="#cliccaAvantiNome" maxWidth="Infinity" text="Avanti" style="-fx-background-color: #0078D7; -fx-text-fill: white;" />
-    <Button mnemonicParsing="false" onAction="#mostraGestioneStanzeView" maxWidth="Infinity" text="Annulla" />
-</VBox>
+        <Label text="Crea nuova stanza">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
+        <TextField fx:id="nomeStanzaField" promptText="Inserisci il nome della stanza..." />
+        <Button mnemonicParsing="false" onAction="#cliccaAvantiNome" maxWidth="Infinity" text="Avanti" style="-fx-background-color: #0078D7; -fx-text-fill: white;" />
+        <Button mnemonicParsing="false" onAction="#mostraGestioneStanzeView" maxWidth="Infinity" text="Annulla" />
+    </VBox>
+</StackPane>

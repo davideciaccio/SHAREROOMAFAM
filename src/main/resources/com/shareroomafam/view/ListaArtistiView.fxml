@@ -3,14 +3,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.VisualizzaProfiliCtrl" prefWidth="500.0" prefHeight="500.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<?import javafx.scene.layout.StackPane?>
 
-    <Label text="Lista Artisti Trovati">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.VisualizzaProfiliCtrl">
+    <VBox alignment="CENTER" spacing="15.0" prefWidth="500.0" prefHeight="500.0" maxWidth="500" maxHeight="500">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <ListView fx:id="risultatiListView" VBox.vgrow="ALWAYS" />
+        <Label text="Lista Artisti Trovati">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
 
-    <Button mnemonicParsing="false" onAction="#mostraCercaArtistaView" maxWidth="Infinity" text="Nuova Ricerca" style="-fx-background-color: #0078D7; -fx-text-fill: white;" />
-</VBox>
+        <ListView fx:id="risultatiListView" VBox.vgrow="ALWAYS" />
+
+        <Button mnemonicParsing="false" onAction="#mostraCercaArtistaView" maxWidth="Infinity" text="Nuova Ricerca" style="-fx-background-color: #0078D7; -fx-text-fill: white;" />
+    </VBox>
+</StackPane>

@@ -7,39 +7,42 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.AuthCtrl" prefWidth="400.0" prefHeight="550.0">
-    <padding>
-        <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
-    </padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.AuthCtrl">
+    <VBox alignment="CENTER" spacing="15.0" prefWidth="400.0" prefHeight="550.0" maxWidth="400" maxHeight="550">
+        <padding>
+            <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
+        </padding>
 
-    <Label text="ShareRoom AFAM">
-        <font>
-            <Font name="System Bold" size="24.0" />
-        </font>
-    </Label>
+        <Label text="ShareRoom AFAM">
+            <font>
+                <Font name="System Bold" size="24.0" />
+            </font>
+        </Label>
 
-    <Label text="Esegui il Login" textFill="#555555" />
+        <Label text="Esegui il Login" textFill="#555555" />
 
-    <VBox spacing="5.0">
-        <Label text="e-mail:" />
-        <TextField fx:id="emailField" promptText="inserisci la tua e-mail..." />
+        <VBox spacing="5.0">
+            <Label text="e-mail:" />
+            <TextField fx:id="emailField" promptText="inserisci la tua e-mail..." />
+        </VBox>
+
+        <VBox spacing="5.0">
+            <Label text="Password:" />
+            <PasswordField fx:id="passwordField" promptText="inserisci la tua password..." />
+        </VBox>
+
+        <Button fx:id="loginButton" mnemonicParsing="false" onAction="#cliccaAccedi" maxWidth="Infinity" text="Accedi" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+        <Button mnemonicParsing="false" onAction="#cliccaEseguiAccessoconSPID" maxWidth="Infinity" text="Esegui accesso con SPID" style="-fx-background-color: #0066CC; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+        <Label fx:id="errorLabel" textFill="RED" wrapText="true" />
+
+        <VBox alignment="CENTER" spacing="10.0">
+            <Button mnemonicParsing="false" onAction="#cliccaRecuperaPassword" text="Recupera password" maxWidth="Infinity"/>
+            <Button mnemonicParsing="false" onAction="#apriRegistrazione" text="Registrati" maxWidth="Infinity"/>
+            <Button mnemonicParsing="false" onAction="#cliccaVisualizzaProfili" text="Visualizza profili" maxWidth="Infinity" style="-fx-background-color: #28A745; -fx-text-fill: white;"/>
+        </VBox>
     </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Password:" />
-        <PasswordField fx:id="passwordField" promptText="inserisci la tua password..." />
-    </VBox>
-
-    <Button fx:id="loginButton" mnemonicParsing="false" onAction="#cliccaAccedi" maxWidth="Infinity" text="Accedi" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold;"/>
-
-    <Button mnemonicParsing="false" onAction="#cliccaEseguiAccessoconSPID" maxWidth="Infinity" text="Esegui accesso con SPID" style="-fx-background-color: #0066CC; -fx-text-fill: white; -fx-font-weight: bold;"/>
-
-    <Label fx:id="errorLabel" textFill="RED" wrapText="true" />
-
-    <VBox alignment="CENTER" spacing="10.0">
-        <Button mnemonicParsing="false" onAction="#cliccaRecuperaPassword" text="Recupera password" maxWidth="Infinity"/>
-        <Button mnemonicParsing="false" onAction="#apriRegistrazione" text="Registrati" maxWidth="Infinity"/>
-        <Button mnemonicParsing="false" onAction="#cliccaVisualizzaProfili" text="Visualizza profili" maxWidth="Infinity" style="-fx-background-color: #28A745; -fx-text-fill: white;"/>
-    </VBox>
-</VBox>
+</StackPane>

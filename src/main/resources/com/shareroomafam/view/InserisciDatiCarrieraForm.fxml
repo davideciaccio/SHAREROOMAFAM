@@ -3,25 +3,28 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.ModificaCarrieraCtrl" prefWidth="400.0" prefHeight="350.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.ModificaCarrieraCtrl">
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="400.0" prefHeight="350.0" maxWidth="400" maxHeight="350">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <Label text="Aggiungi Carriera">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
+        <Label text="Aggiungi Carriera">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
 
-    <VBox spacing="5.0">
-        <Label text="Inserisci carriera:" />
-        <TextField fx:id="carrieraField" promptText="Es. Chitarrista, Pittore..." />
+        <VBox spacing="5.0">
+            <Label text="Inserisci carriera:" />
+            <TextField fx:id="carrieraField" promptText="Es. Chitarrista, Pittore..." />
+        </VBox>
+
+        <VBox spacing="5.0">
+            <Label text="Inserisci anni di carriera:" />
+            <TextField fx:id="anniCarrieraField" promptText="Es. 5" />
+        </VBox>
+
+        <Button mnemonicParsing="false" onAction="#cliccaSalvaModifiche" maxWidth="Infinity" text="Salva modifiche" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
+
+        <Button mnemonicParsing="false" onAction="#mostraModificaCarrieraView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
     </VBox>
-
-    <VBox spacing="5.0">
-        <Label text="Inserisci anni di carriera:" />
-        <TextField fx:id="anniCarrieraField" promptText="Es. 5" />
-    </VBox>
-
-    <Button mnemonicParsing="false" onAction="#cliccaSalvaModifiche" maxWidth="Infinity" text="Salva modifiche" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
-
-    <Button mnemonicParsing="false" onAction="#mostraModificaCarrieraView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
-</VBox>
+</StackPane>

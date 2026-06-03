@@ -3,18 +3,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.GestisciDocumentiCtrl" prefWidth="500.0" prefHeight="450.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.GestisciDocumentiCtrl">
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="500.0" prefHeight="450.0" maxWidth="500" maxHeight="450">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <Label text="Elimina Documenti">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
-    <Label text="Spunta i documenti che desideri rimuovere definitivamente." textFill="#555555" />
+        <Label text="Elimina Documenti">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
+        <Label text="Spunta i documenti che desideri rimuovere definitivamente." textFill="#555555" />
 
-    <ListView fx:id="documentiEliminaChecklistView" VBox.vgrow="ALWAYS" />
+        <ListView fx:id="documentiEliminaChecklistView" VBox.vgrow="ALWAYS" />
 
-    <Button mnemonicParsing="false" onAction="#cliccaElimina" maxWidth="Infinity" text="Elimina" style="-fx-background-color: #DC3545; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
+        <Button mnemonicParsing="false" onAction="#cliccaElimina" maxWidth="Infinity" text="Elimina" style="-fx-background-color: #DC3545; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
 
-    <Button mnemonicParsing="false" onAction="#mostraGestisciDocumentiView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
-</VBox>
+        <Button mnemonicParsing="false" onAction="#mostraGestisciDocumentiView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
+    </VBox>
+</StackPane>

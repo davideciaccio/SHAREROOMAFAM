@@ -3,18 +3,21 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.ModificaCarrieraCtrl" prefWidth="500.0" prefHeight="400.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.ModificaCarrieraCtrl">
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="500.0" prefHeight="400.0" maxWidth="500" maxHeight="400">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <Label text="Modifica Carriera">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
-    <Label text="Gestisci le tipologie di carriere e gli anni di esperienza." textFill="#555555" />
+        <Label text="Modifica Carriera">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
+        <Label text="Gestisci le tipologie di carriere e gli anni di esperienza." textFill="#555555" />
 
-    <Button mnemonicParsing="false" onAction="#cliccaAggiungiCarriera" text="Aggiungi carriera" maxWidth="250" style="-fx-padding: 10px; -fx-background-color: #28A745; -fx-text-fill: white; -fx-font-weight: bold;"/>
-    <Button mnemonicParsing="false" onAction="#cliccaRimuoviCarriera" text="Rimuovi carriera" maxWidth="250" style="-fx-padding: 10px; -fx-text-fill: red;"/>
+        <Button mnemonicParsing="false" onAction="#cliccaAggiungiCarriera" text="Aggiungi carriera" maxWidth="250" style="-fx-padding: 10px; -fx-background-color: #28A745; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Button mnemonicParsing="false" onAction="#cliccaRimuoviCarriera" text="Rimuovi carriera" maxWidth="250" style="-fx-padding: 10px; -fx-text-fill: red;"/>
 
-    <Separator prefWidth="200.0" />
-    <Button mnemonicParsing="false" onAction="#tornaAGestioneDatiPersonali" text="Torna Indietro" maxWidth="250" style="-fx-padding: 10px;"/>
-</VBox>
+        <Separator prefWidth="200.0" />
+        <Button mnemonicParsing="false" onAction="#tornaAGestioneDatiPersonali" text="Torna Indietro" maxWidth="250" style="-fx-padding: 10px;"/>
+    </VBox>
+</StackPane>

@@ -3,20 +3,23 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shareroomafam.control.ModificaStanzaCtrl" prefWidth="400.0" prefHeight="300.0">
-    <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
+<StackPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" alignment="CENTER" fx:controller="com.shareroomafam.control.ModificaStanzaCtrl">
+    <VBox alignment="CENTER" spacing="20.0" prefWidth="400.0" prefHeight="300.0" maxWidth="400" maxHeight="300">
+        <padding><Insets bottom="20.0" left="40.0" right="40.0" top="20.0" /></padding>
 
-    <Label text="Modifica Nome">
-        <font><Font name="System Bold" size="24.0" /></font>
-    </Label>
+        <Label text="Modifica Nome">
+            <font><Font name="System Bold" size="24.0" /></font>
+        </Label>
 
-    <VBox spacing="5.0">
-        <Label text="Inserisci il nuovo nome della stanza:" />
-        <TextField fx:id="nuovoNomeStanzaField" promptText="Es. Il mio portfolio..." />
+        <VBox spacing="5.0">
+            <Label text="Inserisci il nuovo nome della stanza:" />
+            <TextField fx:id="nuovoNomeStanzaField" promptText="Es. Il mio portfolio..." />
+        </VBox>
+
+        <Button mnemonicParsing="false" onAction="#cliccaSalva" maxWidth="Infinity" text="Salva" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
+
+        <Button mnemonicParsing="false" onAction="#mostraModificaStanzaView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
     </VBox>
-
-    <Button mnemonicParsing="false" onAction="#cliccaSalva" maxWidth="Infinity" text="Salva" style="-fx-background-color: #0078D7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" />
-
-    <Button mnemonicParsing="false" onAction="#mostraModificaStanzaView" maxWidth="Infinity" text="Annulla" style="-fx-padding: 10px;"/>
-</VBox>
+</StackPane>

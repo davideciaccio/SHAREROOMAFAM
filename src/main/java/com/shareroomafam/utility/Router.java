@@ -19,7 +19,8 @@ public class Router {
         try {
             Parent root = FXMLLoader.load(Router.class.getResource(fxmlPath));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
             stage.setTitle(titolo);
             stage.show();
         } catch (IOException e) {
