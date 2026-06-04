@@ -42,7 +42,9 @@ header h1 {
 /* Griglia dei documenti */
 .document-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* documenti disposti in colonna singola per occupare quasi tutta la larghezza,
+       ma resteranno reattivi su schermi molto grandi */
+    grid-template-columns: 1fr;
     gap: 25px;
 }
 
@@ -72,11 +74,79 @@ header h1 {
 /* Iframe per l'anteprima (PDF, Immagini) */
 iframe {
     width: 100%;
-    height: 300px;
+    height: 500px; /* altezza standard per anteprime PDF/embedded */
     border: 1px solid #ddd;
     border-radius: 5px;
     margin-bottom: 15px;
     background-color: #f9f9f9;
+}
+
+/* Sezione portfolio artista */
+.artist-portfolio {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin: 20px 0;
+}
+
+.artist-image img {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e6e6e6;
+}
+
+.artist-info {
+    flex: 1;
+}
+
+.artist-info h2 {
+    margin: 0 0 8px 0;
+    color: var(--primary-color);
+}
+
+.artist-dob {
+    margin: 6px 0;
+    color: var(--text-muted);
+}
+
+.artist-carriere-list {
+    margin: 8px 0 0 0;
+    padding-left: 18px;
+    color: var(--text-muted);
+}
+
+/* Media wrapper per immagini grandi: larghezza 100% e altezza fissa con scroll verticale */
+.media-wrapper {
+    width: 100%;
+    max-width: 100%;
+    height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden; /* vietiamo lo scroll orizzontale */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.responsive-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+.documents-section h2 {
+    margin-top: 20px;
+    color: var(--primary-color);
 }
 
 /* Bottoni e Badge */

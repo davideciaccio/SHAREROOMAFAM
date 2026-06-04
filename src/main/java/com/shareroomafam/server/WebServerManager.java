@@ -136,6 +136,7 @@ public class WebServerManager {
                 if (rsStanza != null && rsStanza.next()) {
                     int idStanza = rsStanza.getInt("idStanza");
                     String nomeStanza = rsStanza.getString("nomeStanza");
+                    String codiceFiscaleArtista = rsStanza.getString("codiceFiscale_artista");
 
                     // 3. SALVATAGGIO NEL DB (Addio Errore!)
                     // Inseriamo il Visualizzatore e otteniamo il suo VERO ID
@@ -147,6 +148,83 @@ public class WebServerManager {
                     htmlResponse.append("<div class='container'>");
                     htmlResponse.append("<header><h1>🏠 ").append(nomeStanza).append("</h1>");
                     htmlResponse.append("<p>Benvenuto, ").append(nome).append("!</p></header>");
+
+                    // --- SEZIONE 2: Portfolio artista (dati separati dal nome stanza e dai documenti) ---
+                    ResultSet rsArt = null;
+                    ResultSet rsCarriere = null;
+                    try {
+                        rsArt = DBMSboundary.getInstance().queryDBMSProfiloArtista(codiceFiscaleArtista);
+                        if (rsArt != null && rsArt.next()) {
+                            String artistaNome = rsArt.getString("nome");
+                            String artistaCognome = rsArt.getString("cognome");
+                            String artistaEmail = rsArt.getString("email");
+                            java.sql.Timestamp dobTs = null;
+                            try { dobTs = rsArt.getTimestamp("dataDiNascita"); } catch (Exception ignore) {}
+                            // mostriamo solo la data (YYYY-MM-DD) senza l'ora
+                            String dataDiNascita = "-";
+                            if (dobTs != null) {
+                                try {
+                                    dataDiNascita = dobTs.toLocalDateTime().toLocalDate().toString();
+                                } catch (Exception ignore) {
+                                    dataDiNascita = dobTs.toString().split("\\.")[0].split(" ")[0];
+                                }
+                            }
+                            String urlImmagine = rsArt.getString("urlImmagineProfilo");
+
+                            htmlResponse.append("<section class='artist-portfolio'>");
+                            // immagine
+                            htmlResponse.append("<div class='artist-image'>");
+                            if (urlImmagine != null && !urlImmagine.trim().isEmpty()) {
+                                // mostriamo l'immagine se esiste; la esponiamo tramite il file handler con parametro path
+                                try {
+                                    String encoded = java.net.URLEncoder.encode(urlImmagine, "UTF-8");
+                                    htmlResponse.append("<img src='/file?path=").append(encoded).append("' alt='Immagine profilo' />");
+                                } catch (Exception ex) {
+                                    htmlResponse.append("<img alt='Immagine profilo' style='display:none;' />");
+                                }
+                            } else {
+                                htmlResponse.append("<img alt='Immagine profilo' style='display:none;' />");
+                            }
+                            htmlResponse.append("</div>");
+
+                            // info principali
+                            htmlResponse.append("<div class='artist-info'>");
+                            // rimuoviamo l'emoji come richiesto
+                            htmlResponse.append("<h2>").append(artistaNome).append(" ").append(artistaCognome).append("</h2>");
+                            htmlResponse.append("<p class='artist-dob'><strong>Data di nascita:</strong> ").append(dataDiNascita).append("</p>");
+                            // email artista
+                            htmlResponse.append("<p class='artist-email'><strong>Email:</strong> ").append(artistaEmail != null ? artistaEmail : "-").append("</p>");
+
+                            // carriere
+                            htmlResponse.append("<div class='artist-carriere'>");
+                            htmlResponse.append("<strong>Carriere:</strong> ");
+                            htmlResponse.append("<ul class='artist-carriere-list'>");
+                            rsCarriere = DBMSboundary.getInstance().queryDBMSListaCarriere(codiceFiscaleArtista);
+                            boolean haCarriera = false;
+                            if (rsCarriere != null) {
+                                while (rsCarriere.next()) {
+                                    haCarriera = true;
+                                    String tipo = rsCarriere.getString("tipologia");
+                                    int anni = rsCarriere.getInt("anni");
+                                    htmlResponse.append("<li>").append(tipo).append(" (").append(anni).append(" anni)").append("</li>");
+                                }
+                            }
+                            if (!haCarriera) {
+                                htmlResponse.append("<li>Nessuna carriera registrata.</li>");
+                            }
+                            htmlResponse.append("</ul>");
+                            htmlResponse.append("</div>"); // artist-carriere
+
+                            htmlResponse.append("</div>"); // artist-info
+                            htmlResponse.append("</section>");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // --- SEZIONE 3: Documenti ---
+                    htmlResponse.append("<section class='documents-section'>");
+                    htmlResponse.append("<h2>Documenti della stanza</h2>");
                     htmlResponse.append("<div class='document-grid'>");
 
                     rsDoc = DBMSboundary.getInstance().queryDBMSListaDocumentiStanza(idStanza);
@@ -160,17 +238,36 @@ public class WebServerManager {
                             htmlResponse.append("<div class='card'>");
                             htmlResponse.append("<h3>📄 ").append(nomeFile).append("</h3>");
 
+                            String percorsoLower = percorso.toLowerCase();
+                            boolean isImage = percorsoLower.endsWith(".png") || percorsoLower.endsWith(".jpg") || percorsoLower.endsWith(".jpeg") || percorsoLower.endsWith(".gif");
+
+                            if (isImage) {
+                                // Per le immagini usiamo un wrapper con altezza fissa e scroll verticale
+                                htmlResponse.append("<div class='media-wrapper'><img class='responsive-img' src='/file?id=").append(idDoc).append("' alt='" + nomeFile + "'></div>");
+                            } else {
+                                // PDF / altri formati: usiamo iframe con altezza standard
+                                String src = "/file?id=" + idDoc;
+                                if (!scaricabile && (percorsoLower.endsWith(".pdf"))) src = src + "#toolbar=0";
+                                htmlResponse.append("<iframe src='" + src + "'></iframe>");
+                            }
+
                             if (scaricabile) {
-                                htmlResponse.append("<iframe src='/file?id=").append(idDoc).append("'></iframe>");
                                 htmlResponse.append("<a class='btn download-btn' href='/file?id=").append(idDoc).append("' download>⬇️ Scarica Documento</a>");
                             } else {
-                                htmlResponse.append("<iframe src='/file?id=").append(idDoc).append("#toolbar=0'></iframe>");
                                 htmlResponse.append("<p class='private-badge'>🔒 Sola lettura (Download disabilitato)</p>");
                             }
                             htmlResponse.append("</div>");
                         }
                     }
-                    htmlResponse.append("</div></div>");
+                    htmlResponse.append("</div>"); // document-grid
+                    htmlResponse.append("</section>"); // documents-section
+                    htmlResponse.append("</div>"); // container
+
+                    // Chiudiamo eventuali ResultSet aperti per artista/carriere (il finally chiuderà anche rsStanza/rsDoc)
+                    try {
+                        if (rsCarriere != null && !rsCarriere.isClosed()) rsCarriere.getStatement().close();
+                        if (rsArt != null && !rsArt.isClosed()) rsArt.getStatement().close();
+                    } catch (Exception ignore) {}
                 } else {
                     htmlResponse.append("<div class='container'><h1>❌ Errore 404</h1><p>Stanza inesistente.</p></div>");
                 }
@@ -205,37 +302,68 @@ public class WebServerManager {
     static class FileHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            String query = exchange.getRequestURI().getQuery(); // es: "id=5"
-            if (query != null && query.startsWith("id=")) {
-                int idDocumento = Integer.parseInt(query.split("=")[1]);
+            String query = exchange.getRequestURI().getQuery(); // es: "id=5" or "path=..."
 
-                ResultSet rs = null;
-                try {
-                    rs = DBMSboundary.getInstance().queryDBMSDocumentoById(idDocumento);
-                    if (rs != null && rs.next()) {
-                        String percorso = rs.getString("percorso");
-                        File file = new File(percorso);
-
-                        if (file.exists()) {
-                            // Cerca di capire se è PDF o JPG per dire al browser come aprirlo
-                            String mimeType = Files.probeContentType(file.toPath());
-                            if (mimeType == null) mimeType = "application/octet-stream";
-
-                            exchange.getResponseHeaders().set("Content-Type", mimeType);
-                            exchange.sendResponseHeaders(200, file.length());
-
-                            OutputStream os = exchange.getResponseBody();
-                            Files.copy(file.toPath(), os);
-                            os.close();
-                            return;
+            java.util.Map<String, String> qparams = new java.util.HashMap<>();
+            if (query != null && !query.trim().isEmpty()) {
+                String[] pairs = query.split("&");
+                for (String p : pairs) {
+                    String[] kv = p.split("=", 2);
+                    if (kv.length == 2) {
+                        try {
+                            qparams.put(java.net.URLDecoder.decode(kv[0], "UTF-8"), java.net.URLDecoder.decode(kv[1], "UTF-8"));
+                        } catch (Exception ignore) {
+                            qparams.put(kv[0], kv[1]);
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try { if (rs != null && !rs.isClosed()) rs.getStatement().close(); } catch (Exception ignore) {}
                 }
             }
+
+            // Priorità all'id del documento (più sicuro), altrimenti serviamo il path richiesto
+            if (qparams.containsKey("id")) {
+                try {
+                    int idDocumento = Integer.parseInt(qparams.get("id"));
+                    ResultSet rs = null;
+                    try {
+                        rs = DBMSboundary.getInstance().queryDBMSDocumentoById(idDocumento);
+                        if (rs != null && rs.next()) {
+                            String percorso = rs.getString("percorso");
+                            File file = new File(percorso);
+                            if (file.exists()) {
+                                String mimeType = Files.probeContentType(file.toPath());
+                                if (mimeType == null) mimeType = "application/octet-stream";
+                                exchange.getResponseHeaders().set("Content-Type", mimeType);
+                                exchange.sendResponseHeaders(200, file.length());
+                                OutputStream os = exchange.getResponseBody();
+                                Files.copy(file.toPath(), os);
+                                os.close();
+                                return;
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        try { if (rs != null && !rs.isClosed()) rs.getStatement().close(); } catch (Exception ignore) {}
+                    }
+                } catch (NumberFormatException ignore) {}
+            } else if (qparams.containsKey("path")) {
+                // path fornito (URL-encoded): serviamo direttamente il file indicato
+                String rawPath = qparams.get("path");
+                if (rawPath != null) {
+                    File file = new File(rawPath);
+                    if (file.exists()) {
+                        String mimeType = Files.probeContentType(file.toPath());
+                        if (mimeType == null) mimeType = "application/octet-stream";
+                        exchange.getResponseHeaders().set("Content-Type", mimeType);
+                        exchange.sendResponseHeaders(200, file.length());
+                        OutputStream os = exchange.getResponseBody();
+                        Files.copy(file.toPath(), os);
+                        os.close();
+                        return;
+                    }
+                }
+            }
+
             // File non trovato
             String errorMsg = "File non trovato.";
             exchange.sendResponseHeaders(404, errorMsg.length());
